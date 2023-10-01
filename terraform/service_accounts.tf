@@ -3,6 +3,11 @@ resource "google_service_account" "dl-products" {
   display_name = "dl-products"
 }
 
+resource "google_project_service" "dl-products" {
+  project = "suncoast-systems-products"
+  service = "iam.googleapis.com"
+}
+
 resource "google_project_iam_binding" "dl-products" {
   project = "suncoast-systems-products"
   role    = "roles/owner"
