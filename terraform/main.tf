@@ -4,7 +4,7 @@ provider "google" {
   credentials = file(var.credentials_file) 
 }
 
-module "gcloud" {
-  source  = "terraform-google-modules/gcloud/google"
-  version = "3.2.1"
-}
+# module "gcloud" {
+#   source  = "terraform-google-modules/gcloud/google"
+#   version = "3.2.1"
+# }
