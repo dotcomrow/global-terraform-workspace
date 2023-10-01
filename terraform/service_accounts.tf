@@ -8,7 +8,7 @@ resource "null_resource" "enable_service_usage_api" {
     command = "gcloud services enable serviceusage.googleapis.com cloudresourcemanager.googleapis.com --project suncoast-systems-products"
   }
 
-  depends_on = [google_project.project]
+  depends_on = [google_project.products]
 }
 
 # Wait for the new configuration to propagate
