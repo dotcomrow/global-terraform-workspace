@@ -8,34 +8,9 @@ module "gcloud" {
   version = "~> 3.2"
 
   platform = "linux"
-#   additional_components = ["kubectl", "beta"]
 
-#   create_cmd_entrypoint  = "gcloud"
   create_cmd_body        = "services enable iam.googleapis.com serviceusage.googleapis.com cloudresourcemanager.googleapis.com --project suncoast-systems-products"
-#   destroy_cmd_entrypoint = "gcloud"
-#   destroy_cmd_body       = "version"
 }
-
-# resource "null_resource" "enable_service_usage_api" {
-#   provisioner "local-exec" {
-#     command = "gcloud services enable serviceusage.googleapis.com cloudresourcemanager.googleapis.com --project suncoast-systems-products"
-#   }
-
-#   depends_on = [google_project.products]
-# }
-
-# # Wait for the new configuration to propagate
-# # (might be redundant)
-# resource "time_sleep" "wait_project_init" {
-#   create_duration = "60s"
-
-#   depends_on = [null_resource.enable_service_usage_api]
-# }
-
-# resource "google_project_service" "dl-products" {
-#   project = "suncoast-systems-products"
-#   service = "iam.googleapis.com"
-# }
 
 resource "google_project_iam_binding" "dl-products" {
   project = "suncoast-systems-products"
