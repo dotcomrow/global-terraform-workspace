@@ -3,21 +3,34 @@ resource "google_service_account" "dl-products" {
   display_name = "dl-products"
 }
 
-resource "null_resource" "enable_service_usage_api" {
-  provisioner "local-exec" {
-    command = "gcloud services enable serviceusage.googleapis.com cloudresourcemanager.googleapis.com --project suncoast-systems-products"
-  }
+module "gcloud" {
+  source  = "terraform-google-modules/gcloud/google"
+  version = "~> 3.2"
 
-  depends_on = [google_project.products]
+  platform = "linux"
+  additional_components = ["kubectl", "beta"]
+
+  create_cmd_entrypoint  = "gcloud"
+  create_cmd_body        = "services enable serviceusage.googleapis.com cloudresourcemanager.googleapis.com --project suncoast-systems-products"
+#   destroy_cmd_entrypoint = "gcloud"
+#   destroy_cmd_body       = "version"
 }
 
-# Wait for the new configuration to propagate
-# (might be redundant)
-resource "time_sleep" "wait_project_init" {
-  create_duration = "60s"
+# resource "null_resource" "enable_service_usage_api" {
+#   provisioner "local-exec" {
+#     command = "gcloud services enable serviceusage.googleapis.com cloudresourcemanager.googleapis.com --project suncoast-systems-products"
+#   }
 
-  depends_on = [null_resource.enable_service_usage_api]
-}
+#   depends_on = [google_project.products]
+# }
+
+# # Wait for the new configuration to propagate
+# # (might be redundant)
+# resource "time_sleep" "wait_project_init" {
+#   create_duration = "60s"
+
+#   depends_on = [null_resource.enable_service_usage_api]
+# }
 
 # resource "google_project_service" "dl-products" {
 #   project = "suncoast-systems-products"
