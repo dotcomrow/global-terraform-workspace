@@ -6,6 +6,7 @@ resource "google_service_account" "dl-products" {
 resource "google_project_service" "dl-products" {
   project = "suncoast-systems-products"
   service = "iam.googleapis.com"
+  disable_dependent_services = true
 }
 
 resource "google_project_iam_binding" "dl-products" {
