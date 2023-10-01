@@ -8,10 +8,10 @@ module "gcloud" {
   version = "~> 3.2"
 
   platform = "linux"
-  additional_components = ["kubectl", "beta"]
+#   additional_components = ["kubectl", "beta"]
 
   create_cmd_entrypoint  = "gcloud"
-  create_cmd_body        = "services enable serviceusage.googleapis.com cloudresourcemanager.googleapis.com --project suncoast-systems-products"
+  create_cmd_body        = "services enable iam.googleapis.com serviceusage.googleapis.com cloudresourcemanager.googleapis.com --project suncoast-systems-products"
 #   destroy_cmd_entrypoint = "gcloud"
 #   destroy_cmd_body       = "version"
 }
