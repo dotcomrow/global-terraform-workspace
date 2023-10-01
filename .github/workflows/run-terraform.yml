@@ -78,6 +78,10 @@ jobs:
           base64-encoded-secret: ${{ secrets.GOOGLE_CREDENTIALS }}
           filename: "./terraform/google.key"
           is-executable: false
+
+    - name: Enable API's
+      run: |
+        gcloud services enable iam.googleapis.com serviceusage.googleapis.com cloudresourcemanager.googleapis.com --project suncoast-systems-products
         
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init

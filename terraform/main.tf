@@ -3,8 +3,3 @@ provider "google" {
   region  = var.region
   credentials = file(var.credentials_file) 
 }
-
-module "gcloud-install" {
-  source  = "terraform-google-modules/gcloud/google"
-  version = "3.2.1"
-}
