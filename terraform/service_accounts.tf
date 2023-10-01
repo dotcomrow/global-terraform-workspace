@@ -1,15 +1,15 @@
-# resource "google_service_account" "data-layer-bigquery" {
-#   account_id   = "data-layer-bigquery"
-#   display_name = "data-layer-bigquery"
-# }
+resource "google_service_account" "dl-products" {
+  account_id   = "dl-products"
+  display_name = "dl-products"
+}
 
-# resource "google_project_iam_binding" "data-layer-bigquery" {
-#   project = var.project
-#   role    = "roles/bigquery.dataEditor"
-#   members = [
-#     "serviceAccount:${google_service_account.data-layer-bigquery.email}"
-#   ]
-# }
+resource "google_project_iam_binding" "dl-products" {
+  project = "suncoast-systems-products"
+  role    = "roles/owner"
+  members = [
+    "serviceAccount:${google_service_account.dl-products.email}"
+  ]
+}
 
 # resource "google_service_account" "ol-layer" {
 #   account_id   = "ol-layer"
