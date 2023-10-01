@@ -62,13 +62,6 @@ jobs:
           replace: ${{ env.REPOSITORY_NAME }}
           regex: false
 
-    - name: Find and Replace
-      uses: jacobtomlinson/gha-find-replace@v3
-      with:
-        find: "<DATASET_NAME>"
-        replace: ${{ vars.DATASET_NAME }}
-        regex: false
-
     - name: Writing Google key
       uses: mobiledevops/secret-to-file-action@v1
       with:
