@@ -38,11 +38,6 @@ jobs:
         project="${{ vars.GCP_PROJECT }}"
         EOF
 
-    - id: 'auth'
-      uses: 'google-github-actions/auth@v1'
-      with:
-          credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
-
     - name: Find and Replace
       uses: jacobtomlinson/gha-find-replace@v3
       with:
