@@ -18,7 +18,7 @@ resource "google_service_account" "service_account" {
 
 resource "google_project_iam_binding" "service_account_iam" {
   project = "${var.project_name}-dom"
-  role    = "roles/owner"
+  role    = "roles/editor"
   members = [
     "serviceAccount:${google_service_account.service_account.email}"
   ]
