@@ -15,6 +15,7 @@ variable "apis" {
     "iam.googleapis.com", 
     "cloudresourcemanager.googleapis.com", 
     "cloudbilling.googleapis.com",
-    "bigquery.googleapis.com"
+    "bigquery.googleapis.com",
+    "bigquerystorage.googleapis.com"
   ]
 }
