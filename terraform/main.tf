@@ -6,7 +6,7 @@ provider "google" {
 
 module "projects" {
   source = "./modules/projects"
-  project_name = var.project_name
+  project_name = "products-dom"
   gcp_org_id = var.gcp_org_id
-  apis = var.apis
+  # apis = var.apis
 }
