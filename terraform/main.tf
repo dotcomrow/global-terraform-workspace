@@ -10,3 +10,17 @@ module "projects" {
   gcp_org_id = var.gcp_org_id
   # apis = var.apis
 }
+
+module "projects" {
+  source = "./modules/projects"
+  project_name = "cart-domain"
+  gcp_org_id = var.gcp_org_id
+  # apis = var.apis
+}
+
+module "projects" {
+  source = "./modules/projects"
+  project_name = "orders-domain"
+  gcp_org_id = var.gcp_org_id
+  # apis = var.apis
+}
