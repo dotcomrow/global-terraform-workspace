@@ -10,3 +10,16 @@ resource "google_project_service" "project_service" {
   project = google_project.project.project_id
   service = var.apis[count.index]
 }
+
+resource "google_service_account" "service_account" {
+  account_id   = "${var.project_name}-cicd"
+  display_name = "${var.project_name} GitHub Actions Service Account"
+}
+
+resource "google_project_iam_binding" "service_account_iam" {
+  project = "${var.project_name}-dom"
+  role    = "roles/owner"
+  members = [
+    "serviceAccount:${google_service_account.ervice_account.email}"
+  ]
+}
