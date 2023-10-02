@@ -4,21 +4,21 @@ provider "google" {
   credentials = file(var.credentials_file) 
 }
 
-module "projects" {
+module "products" {
   source = "./modules/projects"
   project_name = "products-domain"
   gcp_org_id = var.gcp_org_id
   # apis = var.apis
 }
 
-module "projects" {
+module "carts" {
   source = "./modules/projects"
-  project_name = "cart-domain"
+  project_name = "carts-domain"
   gcp_org_id = var.gcp_org_id
   # apis = var.apis
 }
 
-module "projects" {
+module "orders" {
   source = "./modules/projects"
   project_name = "orders-domain"
   gcp_org_id = var.gcp_org_id
