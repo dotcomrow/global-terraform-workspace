@@ -9,6 +9,7 @@ resource "google_project_service" "project_service" {
 
   project = google_project.project.project_id
   service = var.apis[count.index]
+  disable_dependent_services=true
 }
 
 resource "google_service_account" "service_account" {
