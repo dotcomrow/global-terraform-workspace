@@ -11,5 +11,5 @@ variable "gcp_org_id" {
 variable "apis" {
   description = "The list of apis to enable"
   type        = list(string)
-  default     = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "cloudbilling.googleapis.com"]
+  default     = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "cloudbilling.googleapis.com", "iam.serviceAccounts.create", "iam.serviceAccounts.actAs", "iam.serviceAccounts.list", "iam.serviceAccountKeys.create", "iam.serviceAccountKeys.delete", "iam.serviceAccountKeys.list", "iam.serviceAccounts.get"]
 }
