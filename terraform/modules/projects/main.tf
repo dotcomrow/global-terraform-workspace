@@ -13,6 +13,7 @@ resource "google_project_service" "project_service" {
 
 resource "google_service_account" "service_account" {
   account_id   = "${var.project_name}-cicd"
+  project      = "${var.project_name}-dom"
   display_name = "${var.project_name} GitHub Actions Service Account"
 }
 
