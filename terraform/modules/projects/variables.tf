@@ -19,7 +19,7 @@ variable "apis" {
   ]
 }
 
-variables "project_module" {
+variable "project_module" {
   description = "Github repo of the project module"
   type        = string
 }
