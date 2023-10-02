@@ -9,7 +9,6 @@ resource "google_project_service" "project_service" {
 
   project = google_project.project.project_id
   service = var.apis[count.index]
-  disable_dependent_services=true
 }
 
 resource "google_service_account" "service_account" {
@@ -24,4 +23,11 @@ resource "google_project_iam_binding" "service_account_iam" {
   members = [
     "serviceAccount:${google_service_account.service_account.email}"
   ]
+}
+
+module "project_module" {
+  source = var.project_module
+  project_id = google_project.project.project_id
+  project_name = var.project_name
+  gcp_org_id = var.gcp_org_id
 }

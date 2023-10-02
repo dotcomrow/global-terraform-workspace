@@ -15,7 +15,11 @@ variable "apis" {
     "iam.googleapis.com", 
     "cloudresourcemanager.googleapis.com", 
     "cloudbilling.googleapis.com",
-    "bigquery.googleapis.com",
-    "bigquerystorage.googleapis.com"
+    "bigquery.googleapis.com"
   ]
+}
+
+variables "project_module" {
+  description = "Github repo of the project module"
+  type        = string
 }
