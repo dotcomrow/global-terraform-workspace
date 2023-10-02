@@ -7,6 +7,6 @@ resource "google_project" "project" {
 resource "google_project_service" "project_service" {
   count = length(var.apis)
 
-  resource_id     = var.object_list[count.index].id
-  service = var.object_list[count.index].service
+  resource_id     = var.apis[count.index].id
+  service = var.apis[count.index].service
 }
