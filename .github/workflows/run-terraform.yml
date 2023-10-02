@@ -43,11 +43,6 @@ jobs:
       with:
           credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
 
-    - name: 'Set up Cloud SDK'
-      uses: 'google-github-actions/setup-gcloud@v1'
-      with:
-          version: '>= 363.0.0'
-
     - name: Find and Replace
       uses: jacobtomlinson/gha-find-replace@v3
       with:

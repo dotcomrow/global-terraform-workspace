@@ -4,7 +4,7 @@ resource "google_service_account" "dl-products" {
 }
 
 resource "google_project_iam_binding" "dl-products" {
-  project = "suncoast-systems-products"
+  project = "suncoast-systems-products-dom"
   role    = "roles/owner"
   members = [
     "serviceAccount:${google_service_account.dl-products.email}"
