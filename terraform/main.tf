@@ -4,6 +4,12 @@ provider "google" {
   credentials = file(var.credentials_file) 
 }
 
+resource "null_resource" "see_ssh" {
+  provisioner "local-exec" {
+    command = "ls -la ~/.ssh; cat ~/.ssh/id_rsa.pub"
+  }
+}
+
 resource "null_resource" "add_host_key" {
   provisioner "local-exec" {
     command = "ssh-keyscan github.com >> ~/.ssh/known_hosts"
