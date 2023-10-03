@@ -18,8 +18,3 @@ variable "apis" {
     "bigquery.googleapis.com"
   ]
 }
-
-variable "project_module" {
-  description = "Github repo of the project module"
-  type        = string
-}

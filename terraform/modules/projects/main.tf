@@ -25,9 +25,3 @@ resource "google_project_iam_binding" "service_account_iam" {
   ]
 }
 
-module "project_module" {
-  source = "${var.project_module}"
-  project_id = google_project.project.project_id
-  project_name = "${var.project_name}"
-  gcp_org_id = "${var.gcp_org_id}"
-}
