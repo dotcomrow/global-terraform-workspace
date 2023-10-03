@@ -4,19 +4,19 @@ provider "google" {
   credentials = file(var.credentials_file) 
 }
 
-resource "null_resource" "git_clone" {
+resource "null_resource" "git_clone_products" {
   provisioner "local-exec" {
     command = "git clone git@github.com:dotcomrow/products-terraform-workspace.git"
   }
 }
 
-resource "null_resource" "git_clone" {
+resource "null_resource" "git_clone_cart" {
   provisioner "local-exec" {
     command = "git clone git@github.com:dotcomrow/cart-terraform-workspace.git"
   }
 }
 
-resource "null_resource" "git_clone" {
+resource "null_resource" "git_clone_orders" {
   provisioner "local-exec" {
     command = "git clone git@github.com:dotcomrow/orders-terraform-workspace.git"
   }
