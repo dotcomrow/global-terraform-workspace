@@ -4,6 +4,12 @@ provider "google" {
   credentials = file(var.credentials_file) 
 }
 
+resource "null_resource" "add_pk" {
+  provisioner "local-exec" {
+    command = "echo \"$SSH_PRIVATE_KEY\" | tr -d '\r' | ssh-add -"
+  }
+}
+
 resource "null_resource" "git_clone_products" {
   provisioner "local-exec" {
     command = "git clone git@github.com:dotcomrow/products-terraform-workspace.git"
