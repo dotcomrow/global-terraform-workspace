@@ -49,4 +49,3 @@ module "products" {
   source  = "app.terraform.io/dotcomrow/products/google"
   version = "1.0.0"
 }
-```
