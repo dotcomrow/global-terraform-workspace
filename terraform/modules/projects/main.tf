@@ -7,6 +7,7 @@ resource "google_project" "project" {
 resource "google_project_service" "project_service" {
   count = length(var.apis)
 
+  disable_dependent_services = true
   project = google_project.project.project_id
   service = var.apis[count.index]
 }

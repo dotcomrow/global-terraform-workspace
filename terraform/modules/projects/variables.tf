@@ -9,8 +9,7 @@ variable "gcp_org_id" {
 }
 
 variable "apis" {
-  description = "The list of apis to enable"
-  disable_dependent_services = true
+  description = "The list of apis to enable"  
   type        = list(string)
   default     = [
     "iam.googleapis.com", 
