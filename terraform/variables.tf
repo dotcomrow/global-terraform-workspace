@@ -14,10 +14,10 @@ variable gcp_org_id {
     default = "<GCP_ORGANIZATION_ID>" 
 }
 
-variable "repositories" {
-  default = [
-    "products-terraform-workspace", 
-    "cart-terraform-workspace",
-    "orders-terraform-workspace"
-  ]
-}
+# variable "repositories" {
+#   default = [
+#     "products-terraform-workspace", 
+#     "cart-terraform-workspace",
+#     "orders-terraform-workspace"
+#   ]
+# }
