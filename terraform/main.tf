@@ -20,7 +20,7 @@ resource "google_identity_platform_oauth_idp_config" "oauth_idp_config" {
   client_secret = "12secret34"
   project       = var.project_name
 
-  depends_on = [ "identitytoolkit.googleapis.com" ]
+  depends_on = [ identitytoolkit.googleapis.com ]
 }
 
 module "orders" {
