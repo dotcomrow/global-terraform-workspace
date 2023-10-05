@@ -1,7 +1,8 @@
 resource "google_bigquery_dataset" "configuration_dataset" {
-  dataset_id                  = "configuration"
+  dataset_id                  = "config"
   description                 = "Configuration dataset"
   location                    = "US"
+  project                     = var.project
 }
 
 resource "google_bigquery_table" "sequences" {
