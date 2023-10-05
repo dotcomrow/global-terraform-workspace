@@ -4,6 +4,14 @@ provider "google" {
   credentials = file(var.credentials_file) 
 }
 
+resource "google_project_service" "project_service" {
+  count = length(var.apis)
+
+  disable_dependent_services = true
+  project = google_project.project.project_id
+  service = var.apis[count.index]
+}
+
 # resource "null_resource" "loop_list" {
 #   provisioner "local-exec" {
 #     command     = "for item in $REPOS; do git clone git@github.com:<ORGANIZATION_ID>/$item.git; done"

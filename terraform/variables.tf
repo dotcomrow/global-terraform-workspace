@@ -21,3 +21,13 @@ variable gcp_org_id {
 #     "orders-terraform-workspace"
 #   ]
 # }
+
+variable "apis" {
+  description = "The list of apis to enable"  
+  type        = list(string)
+  default     = [
+    "iam.googleapis.com", 
+    "cloudresourcemanager.googleapis.com", 
+    "cloudbilling.googleapis.com"
+  ]
+}
