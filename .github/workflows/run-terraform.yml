@@ -35,7 +35,7 @@ jobs:
       run: |-
         cat > pipeline.auto.tfvars <<EOF
         region="${{ vars.GCP_REGION }}" 
-        project="${{ vars.GCP_PROJECT }}"
+        project_name="${{ vars.GCP_PROJECT }}"
         EOF
 
     - name: Find and Replace
