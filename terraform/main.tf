@@ -38,20 +38,20 @@ provider "google" {
 module "orders" {
   source  = "app.terraform.io/dotcomrow/orders/google"
   version = "> 1.0.0"
-  project_name = "orders_domain"
+  project_name = "ordersDomain"
   gcp_org_id = var.gcp_org_id
 }
 
 module "cart" {
   source  = "app.terraform.io/dotcomrow/cart/google"
   version = "> 1.0.0"
-  project_name = "carts_domain"
+  project_name = "cartsDomain"
   gcp_org_id = var.gcp_org_id
 }
 
 module "products" {
   source  = "app.terraform.io/dotcomrow/products/google"
   version = "> 1.0.0"
-  project_name = "products_domain"
+  project_name = "productsDomain"
   gcp_org_id = var.gcp_org_id
 }
