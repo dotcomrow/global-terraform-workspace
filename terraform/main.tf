@@ -11,16 +11,6 @@ resource "google_project_service" "project_service" {
   service = var.apis[count.index]
 }
 
-resource "google_identity_platform_oauth_idp_config" "oauth_idp_config" {
-  name          = "oidc.oauth-idp-config"
-  display_name  = "OAuth IDP Config"
-  client_id     = "suncoast.systems"
-  issuer        = "issuer"
-  enabled       = true
-  client_secret = "12secret34"
-  project       = var.project_name
-}
-
 module "orders" {
   source  = "app.terraform.io/dotcomrow/orders/google"
   version = "> 1.0.0"
