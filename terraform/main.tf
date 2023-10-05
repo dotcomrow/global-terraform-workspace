@@ -18,6 +18,7 @@ resource "google_identity_platform_oauth_idp_config" "oauth_idp_config" {
   issuer        = "issuer"
   enabled       = true
   client_secret = "12secret34"
+  project       = var.project_name
 }
 
 module "orders" {
