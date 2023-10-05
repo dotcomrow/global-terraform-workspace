@@ -4,6 +4,13 @@ provider "google" {
   credentials = file(var.credentials_file) 
 }
 
+resource "google_project" "project" {
+  name       = "${var.project_name}"
+  project_id = "${var.project_name}"
+  org_id     = "${var.gcp_org_id}"
+  billing_account = "${var.billing_account}"
+}
+
 resource "google_project_service" "project_service" {
   count = length(var.apis)
 
@@ -48,7 +55,7 @@ module "orders" {
   version = "> 1.0.0"
   project_name = "ordersdomn"
   gcp_org_id = var.gcp_org_id
-  billing_account = "0126C7-7C7247-4B8FBB"
+  billing_account = "${var.billing_account}"
 }
 
 module "cart" {
@@ -56,7 +63,7 @@ module "cart" {
   version = "> 1.0.0"
   project_name = "cartsdomn"
   gcp_org_id = var.gcp_org_id
-  billing_account = "0126C7-7C7247-4B8FBB"
+  billing_account ="${var.billing_account}"
 }
 
 module "products" {
@@ -64,5 +71,5 @@ module "products" {
   version = "> 1.0.0"
   project_name = "productsdomn"
   gcp_org_id = var.gcp_org_id
-  billing_account = "0126C7-7C7247-4B8FBB"
+  billing_account = "${var.billing_account}"
 }

@@ -31,3 +31,9 @@ variable "apis" {
     "cloudbilling.googleapis.com"
   ]
 }
+
+variable "billing_account" {
+  description = "The billing account id"
+  type        = string
+  default     = "0126C7-7C7247-4B8FBB"
+}
