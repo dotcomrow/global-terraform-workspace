@@ -1,5 +1,5 @@
 provider "google" {
-  project = var.project
+  project = var.project_name
   region  = var.region
   credentials = file(var.credentials_file) 
 }
@@ -40,6 +40,7 @@ module "orders" {
   version = "> 1.0.0"
   project_name = "ordersdom"
   gcp_org_id = var.gcp_org_id
+  billing_account = "0126C7-7C7247-4B8FBB"
 }
 
 module "cart" {
@@ -47,6 +48,7 @@ module "cart" {
   version = "> 1.0.0"
   project_name = "cartsdom"
   gcp_org_id = var.gcp_org_id
+  billing_account = "0126C7-7C7247-4B8FBB"
 }
 
 module "products" {
@@ -54,4 +56,5 @@ module "products" {
   version = "> 1.0.0"
   project_name = "productsdom"
   gcp_org_id = var.gcp_org_id
+  billing_account = "0126C7-7C7247-4B8FBB"
 }

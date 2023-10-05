@@ -2,14 +2,14 @@ resource "google_bigquery_dataset" "configuration_dataset" {
   dataset_id                  = "config"
   description                 = "Configuration dataset"
   location                    = "US"
-  project                     = var.project
+  project                     = var.project_name
 }
 
 resource "google_bigquery_table" "sequences" {
   dataset_id = google_bigquery_dataset.configuration_dataset.dataset_id
   table_id   = "sequences"
   deletion_protection = false
-
+  project                     = var.project_name
   schema = <<EOF
 [
   {
@@ -32,7 +32,7 @@ resource "google_bigquery_table" "lookup_codes" {
   dataset_id = google_bigquery_dataset.configuration_dataset.dataset_id
   table_id   = "lookup_codes"
   deletion_protection = false
-
+  project                     = var.project_name
   schema = <<EOF
 [
   {
@@ -74,6 +74,7 @@ resource "google_bigquery_routine" "get_row_id" {
   routine_id      = "get_row_id"
   routine_type    = "PROCEDURE"
   language        = "SQL"
+  project                     = var.project_name
   arguments {
     name = "sequence_name"
     data_type = "{\"typeKind\" :  \"STRING\"}"
