@@ -21,7 +21,8 @@ variable "apis" {
     "iam.googleapis.com", 
     "cloudresourcemanager.googleapis.com", 
     "cloudbilling.googleapis.com",
-    "identitytoolkit.googleapis.com"
+    "identitytoolkit.googleapis.com",
+    "secretmanager.googleapis.com"
   ]
 }
 
