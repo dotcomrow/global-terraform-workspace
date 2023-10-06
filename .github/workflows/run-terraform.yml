@@ -36,6 +36,7 @@ jobs:
         cat > pipeline.auto.tfvars <<EOF
         region="${{ vars.GCP_REGION }}" 
         project_name="${{ vars.GCP_PROJECT }}"
+        gcp_org_id="${{ secrets.GCP_ORGANIZATION_ID }}"
         EOF
 
     - name: Find and Replace
@@ -44,13 +45,6 @@ jobs:
         find: "<ORGANIZATION_ID>"
         replace: ${{ vars.ORGANIZATION_ID }}
         regex: false
-
-    - name: Find and Replace
-      uses: jacobtomlinson/gha-find-replace@v3
-      with:
-          find: "<GCP_ORGANIZATION_ID>"
-          replace: ${{ secrets.GCP_ORGANIZATION_ID }}
-          regex: false
 
     - name: get repository name
       run: echo "REPOSITORY_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
