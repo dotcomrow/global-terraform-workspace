@@ -20,8 +20,12 @@ variable "apis" {
   default     = [
     "iam.googleapis.com", 
     "cloudresourcemanager.googleapis.com", 
+    "bigquery.googleapis.com",
+    "bigquerystorage.googleapis.com",
     "cloudbilling.googleapis.com",
-    "identitytoolkit.googleapis.com",
+    "run.googleapis.com",
+    "artifactregistry.googleapis.com",
+    "containerregistry.googleapis.com",
     "secretmanager.googleapis.com"
   ]
 }
