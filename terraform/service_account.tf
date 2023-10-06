@@ -14,10 +14,6 @@ resource "google_project_iam_binding" "service_account_iam" {
 
 resource "google_service_account_key" "key" {
   service_account_id = google_service_account.service_account.name
-  
-  keepers = {
-    rotation_time = time_rotating.mykey_rotation.rotation_rfc3339
-  }
 }
 
 resource "google_secret_manager_secret" "service_account" {
