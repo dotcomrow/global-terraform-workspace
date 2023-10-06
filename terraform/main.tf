@@ -1,14 +1,5 @@
 provider "google" {
   region  = var.region
-  credentials = file(var.credentials_file) 
-}
-
-resource "google_project_service" "project_service" {
-  count = length(var.apis)
-
-  disable_dependent_services = true
-  project = var.project_name
-  service = var.apis[count.index]
 }
 
 module "orders" {

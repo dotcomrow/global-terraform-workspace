@@ -1,11 +1,11 @@
 resource "google_service_account" "service_account" {
-  account_id   = "${var.project_name}-bigquery-access"
-  project      = "${var.project_name}"
-  display_name = "${var.project_name} BigQuery Access Service Account"
+  account_id   = "${var.common_project_name}-bigquery-access"
+  project      = "${var.common_project_name}"
+  display_name = "${var.common_project_name} BigQuery Access Service Account"
 }
 
 resource "google_project_iam_binding" "service_account_iam" {
-  project = "${var.project_name}"
+  project = "${var.common_project_name}"
   role    = "roles/editor"
   members = [
     "serviceAccount:${google_service_account.service_account.email}"
@@ -26,7 +26,7 @@ resource "google_secret_manager_secret" "service_account" {
       }
     }
   }
-  project = var.project_name
+  project = var.common_project_name
 }
 
 resource "google_secret_manager_secret_version" "service_account_private_key" {

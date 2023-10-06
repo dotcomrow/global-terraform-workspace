@@ -30,15 +30,6 @@ jobs:
       with:
         cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
-    - name: Setup terraform variables
-      id: vars
-      run: |-
-        cat > pipeline.auto.tfvars <<EOF
-        region="${{ vars.GCP_REGION }}" 
-        project_name="${{ vars.GCP_PROJECT }}"
-        gcp_org_id="${{ secrets.GCP_ORGANIZATION_ID }}"
-        EOF
-
     - name: Find and Replace
       uses: jacobtomlinson/gha-find-replace@v3
       with:
@@ -55,13 +46,6 @@ jobs:
           find: "<WORKSPACE_NAME>"
           replace: ${{ env.REPOSITORY_NAME }}
           regex: false
-
-    - name: Writing Google key
-      uses: mobiledevops/secret-to-file-action@v1
-      with:
-          base64-encoded-secret: ${{ secrets.GOOGLE_CREDENTIALS }}
-          filename: "./terraform/google.key"
-          is-executable: false
         
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
