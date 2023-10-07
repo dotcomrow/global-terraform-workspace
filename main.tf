@@ -14,6 +14,7 @@ module "orders" {
   project_id = "${random_pet.project_id.id}"
   gcp_org_id = "${var.gcp_org_id}"
   billing_account = "${var.billing_account}"
+  region  = "${var.region}"
 }
 
 module "carts" {
@@ -23,6 +24,7 @@ module "carts" {
   project_id = "${random_pet.project_id.id}"
   gcp_org_id = "${var.gcp_org_id}"
   billing_account ="${var.billing_account}"
+  region  = "${var.region}"
 }
 
 module "products" {
@@ -32,4 +34,5 @@ module "products" {
   project_id = "${random_pet.project_id.id}"
   gcp_org_id = "${var.gcp_org_id}"
   billing_account = "${var.billing_account}"
+  region  = "${var.region}"
 }
