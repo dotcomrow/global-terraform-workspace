@@ -1,9 +1,9 @@
 terraform {
   cloud {
-    organization = "<ORGANIZATION_ID>"
+    organization = "dotcomrow"
 
     workspaces {
-      name = "<WORKSPACE_NAME>"
+      name = "global-terraform-workspace"
     }
   }
 }
