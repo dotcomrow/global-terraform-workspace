@@ -5,7 +5,7 @@ provider "google" {
 module "orders" {
   source  = "app.terraform.io/dotcomrow/orders/google"
   version = "> 1.0.0"
-  project_name = "order"
+  project_name = "orderdata"
   gcp_org_id = "${var.gcp_org_id}"
   billing_account = "${var.billing_account}"
 }
@@ -13,7 +13,7 @@ module "orders" {
 module "cart" {
   source  = "app.terraform.io/dotcomrow/cart/google"
   version = "> 1.0.0"
-  project_name = "cart"
+  project_name = "cartdata"
   gcp_org_id = "${var.gcp_org_id}"
   billing_account ="${var.billing_account}"
 }
@@ -21,7 +21,7 @@ module "cart" {
 module "products" {
   source  = "app.terraform.io/dotcomrow/products/google"
   version = "> 1.0.0"
-  project_name = "product"
+  project_name = "productdata"
   gcp_org_id = "${var.gcp_org_id}"
   billing_account = "${var.billing_account}"
 }
