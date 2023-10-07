@@ -17,3 +17,14 @@ variable "billing_account" {
   description = "The billing account id"
   type        = string
 }
+
+variable "apis" {
+  description = "The list of apis to enable"  
+  type        = list(string)
+  default     = [
+    "iam.googleapis.com", 
+    "cloudresourcemanager.googleapis.com", 
+    "cloudbilling.googleapis.com",
+    "secretmanager.googleapis.com"
+  ]
+}
