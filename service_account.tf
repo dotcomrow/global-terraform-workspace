@@ -1,5 +1,5 @@
 resource "google_service_account" "service_account" {
-  account_id   = "${var.common_project_name}-bigquery"
+  account_id   = "${var.common_project_name}-bq"
   project      = "${var.common_project_name}"
   display_name = "${var.common_project_name} BigQuery Access Service Account"
 }
