@@ -9,7 +9,7 @@ variable "region" {
   nullable = false
 }
 
-variable gcp_org_id {
+variable "gcp_org_id" {
   description = "The GCP organization id"
   type        = string
   nullable = false
