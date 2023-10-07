@@ -7,11 +7,15 @@ resource "random_pet" "project_id" {
   separator = "-"
 }
 
+resource "random_id" "suffix" {
+  byte_length = 8
+}
+
 module "orders" {
   source  = "app.terraform.io/dotcomrow/orders/google"
   version = "> 1.0.0"
   project_name = "orders"
-  project_id = "${random_pet.project_id.id}"
+  project_id = "${random_pet.project_id.id}-${random_id.suffix.hex}"
   gcp_org_id = "${var.gcp_org_id}"
   billing_account = "${var.billing_account}"
   region  = "${var.region}"
@@ -21,7 +25,7 @@ module "carts" {
   source  = "app.terraform.io/dotcomrow/cart/google"
   version = "> 1.0.0"
   project_name = "carts"
-  project_id = "${random_pet.project_id.id}"
+  project_id = "${random_pet.project_id.id}-${random_id.suffix.hex}"
   gcp_org_id = "${var.gcp_org_id}"
   billing_account ="${var.billing_account}"
   region  = "${var.region}"
@@ -31,7 +35,7 @@ module "products" {
   source  = "app.terraform.io/dotcomrow/products/google"
   version = "> 1.0.0"
   project_name = "products"
-  project_id = "${random_pet.project_id.id}"
+  project_id = "${random_pet.project_id.id}-${random_id.suffix.hex}"
   gcp_org_id = "${var.gcp_org_id}"
   billing_account = "${var.billing_account}"
   region  = "${var.region}"
