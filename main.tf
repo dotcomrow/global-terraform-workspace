@@ -2,7 +2,7 @@ provider "google" {
   region  = "${var.region}"
 }
 
-module "orders" {
+module "orderdata" {
   source  = "app.terraform.io/dotcomrow/orders/google"
   version = "> 1.0.0"
   project_name = "orderdata"
@@ -10,7 +10,7 @@ module "orders" {
   billing_account = "${var.billing_account}"
 }
 
-module "cart" {
+module "cartdata" {
   source  = "app.terraform.io/dotcomrow/cart/google"
   version = "> 1.0.0"
   project_name = "cartdata"
@@ -18,7 +18,7 @@ module "cart" {
   billing_account ="${var.billing_account}"
 }
 
-module "products" {
+module "productdata" {
   source  = "app.terraform.io/dotcomrow/products/google"
   version = "> 1.0.0"
   project_name = "productdata"
