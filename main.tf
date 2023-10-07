@@ -10,6 +10,7 @@ module "orders" {
   gcp_org_id = "${var.gcp_org_id}"
   billing_account = "${var.billing_account}"
   region  = "${var.region}"
+  secrets_project_id = "${var.secrets_project_id}"
 }
 
 module "carts" {
@@ -20,6 +21,7 @@ module "carts" {
   gcp_org_id = "${var.gcp_org_id}"
   billing_account ="${var.billing_account}"
   region  = "${var.region}"
+  secrets_project_id = "${var.secrets_project_id}"
 }
 
 module "products" {
@@ -30,4 +32,5 @@ module "products" {
   gcp_org_id = "${var.gcp_org_id}"
   billing_account = "${var.billing_account}"
   region  = "${var.region}"
+  secrets_project_id = "${var.secrets_project_id}"
 }
