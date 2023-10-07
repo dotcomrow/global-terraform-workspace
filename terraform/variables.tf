@@ -1,19 +1,22 @@
 variable "common_project_name" {
   nullable = false
   description = "The name of project to store global bigquery service account"
-  default = ""
 }
 
 variable "region" {
-    default = "<REGION>"
+  description = "The region to deploy resources"
+  type        = string
+  nullable = false
 }
 
 variable gcp_org_id {
-    default = "<GCP_ORGANIZATION_ID>" 
+  description = "The GCP organization id"
+  type        = string
+  nullable = false
 }
 
 variable "billing_account" {
   description = "The billing account id"
   type        = string
-  default = ""
+  nullable = false
 }
