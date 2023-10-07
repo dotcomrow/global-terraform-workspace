@@ -22,11 +22,11 @@ resource "google_secret_manager_secret" "service_account" {
   replication {
     user_managed {
       replicas {
-        location = var.region
+        location = "${var.region}"
       }
     }
   }
-  project = var.common_project_name
+  project = "${var.common_project_name}"
 }
 
 resource "google_secret_manager_secret_version" "service_account_private_key" {
