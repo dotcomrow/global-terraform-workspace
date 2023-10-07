@@ -2,14 +2,6 @@ provider "google" {
   region  = "${var.region}"
 }
 
-resource "google_project_service" "project_service" {
-  count = length(var.apis)
-
-  disable_dependent_services = true
-  project = "${var.common_project_name}"
-  service = var.apis[count.index]
-}
-
 module "orders" {
   source  = "app.terraform.io/dotcomrow/orders/google"
   version = "> 1.0.0"
