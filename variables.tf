@@ -1,6 +1,7 @@
 variable "common_project_name" {
   nullable = false
   description = "The name of project to store global bigquery service account"
+  type = string
 }
 
 variable "region" {
