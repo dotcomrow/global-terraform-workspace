@@ -2,26 +2,26 @@ provider "google" {
   region  = "${var.region}"
 }
 
-module "orderdata" {
+module "orderproject" {
   source  = "app.terraform.io/dotcomrow/orders/google"
   version = "> 1.0.0"
-  project_name = "orderdata"
+  project_name = "orderproject"
   gcp_org_id = "${var.gcp_org_id}"
   billing_account = "${var.billing_account}"
 }
 
-module "cartdata" {
+module "cartproject" {
   source  = "app.terraform.io/dotcomrow/cart/google"
   version = "> 1.0.0"
-  project_name = "cartdata"
+  project_name = "cartproject"
   gcp_org_id = "${var.gcp_org_id}"
   billing_account ="${var.billing_account}"
 }
 
-module "productdata" {
+module "productproject" {
   source  = "app.terraform.io/dotcomrow/products/google"
   version = "> 1.0.0"
-  project_name = "productdata"
+  project_name = "productproject"
   gcp_org_id = "${var.gcp_org_id}"
   billing_account = "${var.billing_account}"
 }
