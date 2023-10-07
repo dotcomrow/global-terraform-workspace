@@ -22,3 +22,9 @@ variable "suffix" {
   description = "The suffix to append to project names"
   type        = string
 }
+
+variable "secrets_project_id" {
+  description = "The project id to create the secrets in"
+  type        = string
+  nullable = false
+}
