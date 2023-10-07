@@ -17,3 +17,8 @@ variable "billing_account" {
   description = "The billing account id"
   type        = string
 }
+
+variable "suffix" {
+  description = "The suffix to append to project names"
+  type        = string
+}
