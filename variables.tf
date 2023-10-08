@@ -28,3 +28,9 @@ variable "bigquery_secret" {
   type        = string
   nullable = false
 }
+
+variable "python_session_secret" {
+  description = "Python session secret to use for the service account"
+  type        = string
+  nullable = false
+}
