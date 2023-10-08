@@ -11,6 +11,7 @@ module "orders" {
   billing_account = "${var.billing_account}"
   region  = "${var.region}"
   bigquery_secret = "${var.bigquery_secret}"
+  python_session_secret = "${var.python_session_secret}"
 }
 
 module "carts" {
@@ -22,6 +23,7 @@ module "carts" {
   billing_account ="${var.billing_account}"
   region  = "${var.region}"
   bigquery_secret = "${var.bigquery_secret}"
+  python_session_secret = "${var.python_session_secret}"
 }
 
 module "products" {
@@ -33,4 +35,5 @@ module "products" {
   billing_account = "${var.billing_account}"
   region  = "${var.region}"
   bigquery_secret = "${var.bigquery_secret}"
+  python_session_secret = "${var.python_session_secret}"
 }
