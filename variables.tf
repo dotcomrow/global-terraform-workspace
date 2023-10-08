@@ -34,3 +34,9 @@ variable "python_session_secret" {
   type        = string
   nullable = false
 }
+
+variable "common_project_id" {
+  description = "value of common project id"
+  type        = string
+  nullable = false
+}
