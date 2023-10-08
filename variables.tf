@@ -23,8 +23,8 @@ variable "suffix" {
   type        = string
 }
 
-variable "secrets_project_id" {
-  description = "The project id to create the secrets in"
+variable "bigquery_secret" {
+  description = "Bigquery secret to use for the service account"
   type        = string
   nullable = false
 }
