@@ -40,3 +40,9 @@ variable "common_project_id" {
   type        = string
   nullable = false
 }
+
+variable "audience" {
+  description = "audience for the service account"
+  type        = string
+  nullable = false
+}
