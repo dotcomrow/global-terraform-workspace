@@ -25,6 +25,7 @@ module "carts" {
   region  = "${var.region}"
   bigquery_secret = "${var.bigquery_secret}"
   python_session_secret = "${var.python_session_secret}"
+  common_project_id = "${var.common_project_id}"
   audience = "${var.audience}"
 }
 
