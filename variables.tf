@@ -46,3 +46,9 @@ variable "audience" {
   type        = string
   nullable = false
 }
+
+variable "config_security_group" {
+  description = "security group for configuration"
+  type        = string
+  nullable = false
+}

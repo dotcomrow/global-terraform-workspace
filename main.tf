@@ -55,4 +55,5 @@ module "configuration" {
   python_session_secret = "${var.python_session_secret}"
   common_project_id = "${var.common_project_id}"
   audience = "${var.audience}"
+  config_security_group = "${var.config_security_group}"
 }
