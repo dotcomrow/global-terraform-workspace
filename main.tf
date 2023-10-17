@@ -2,9 +2,13 @@ provider "google" {
   region  = "${var.region}"
 }
 
-provider "cloudflare" {
-  email = var.cloudflare_email
-  token = var.cloudflare_api_key
+terraform {
+  required_providers {
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 4.0"
+    }
+  }
 }
 
 module "orders" {
