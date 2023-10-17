@@ -2,6 +2,11 @@ provider "google" {
   region  = "${var.region}"
 }
 
+provider "cloudflare" {
+  email = var.cloudflare_email
+  token = var.cloudflare_api_key
+}
+
 module "orders" {
   source  = "app.terraform.io/dotcomrow/orders/google"
   version = "> 1.0.0"
