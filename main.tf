@@ -2,19 +2,6 @@ provider "google" {
   region  = "${var.region}"
 }
 
-terraform {
-  required_providers {
-    cloudflare = {
-      source  = "cloudflare/cloudflare"
-      version = "~> 4.0"
-    }
-  }
-}
-
-provider "cloudflare" {
-  api_token = "${var.cloudflare_token}"
-}
-
 module "orders" {
   source  = "app.terraform.io/dotcomrow/orders/google"
   version = "> 1.0.0"
