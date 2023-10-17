@@ -11,7 +11,7 @@ terraform {
   }
 }
 
-provider "cloudflare" {
+provider "cloudflare/cloudflare" {
   api_token = "${var.cloudflare_token}"
 }
 
