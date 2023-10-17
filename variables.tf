@@ -58,3 +58,9 @@ variable "cloudflare_token" {
   type        = string
   nullable = false
 }
+
+variable "cloudflare_account_id" {
+  description = "cloudflare account id"
+  type        = string
+  nullable = false
+}

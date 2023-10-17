@@ -69,4 +69,5 @@ module "configuration" {
   common_project_id = "${var.common_project_id}"
   audience = "${var.audience}"
   config_security_group = "${var.config_security_group}"
+  cloudflare_account_id = "${var.cloudflare_account_id}"
 }
