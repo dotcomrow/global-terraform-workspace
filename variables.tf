@@ -53,13 +53,7 @@ variable "config_security_group" {
   nullable = false
 }
 
-variable "cloudflare_email" {
-  description = "cloudflare email"
-  type        = string
-  nullable = false
-}
-
-variable "cloudflare_api_key" {
+variable "cloudflare_token" {
   description = "cloudflare token"
   type        = string
   nullable = false
