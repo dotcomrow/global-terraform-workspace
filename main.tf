@@ -12,6 +12,7 @@ module "api_gateway" {
   cloudflare_worker_url_pattern = "${var.cloudflare_worker_url_pattern}"
   cloudflare_worker_zone_id = "${var.cloudflare_worker_zone_id}"
 }
+
 module "orders" {
   source  = "app.terraform.io/dotcomrow/orders/google"
   version = "> 1.0.0"
