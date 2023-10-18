@@ -53,12 +53,6 @@ variable "config_security_group" {
   nullable = false
 }
 
-variable "cloudflare_token" {
-  description = "cloudflare token"
-  type        = string
-  nullable = false
-}
-
 variable "cloudflare_account_id" {
   description = "Cloudflare account id"
   type        = string
