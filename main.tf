@@ -2,6 +2,16 @@ provider "google" {
   region  = "${var.region}"
 }
 
+module "api-gateway" {
+  source = "app.terraform.io/dotcomrow/api-gateway/cloudflare"
+  version = "> 1.0.0"
+  cloudflare_account_id = "${var.cloudflare_account_id}"
+  cloudflare_cache_max_age = "${var.cloudflare_cache_max_age}"
+  cloudflare_cors_domains = "${var.cloudflare_cors_domains}"
+  cloudflare_worker_hostname = "${var.cloudflare_worker_hostname}"
+  cloudflare_worker_url_pattern = "${var.cloudflare_worker_url_pattern}"
+  cloudflare_worker_zone_id = "${var.cloudflare_worker_zone_id}"
+}
 module "orders" {
   source  = "app.terraform.io/dotcomrow/orders/google"
   version = "> 1.0.0"
