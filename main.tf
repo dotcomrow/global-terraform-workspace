@@ -2,7 +2,7 @@ provider "google" {
   region  = "${var.region}"
 }
 
-module "api-gateway" {
+module "api_gateway" {
   source = "app.terraform.io/dotcomrow/api-gateway/cloudflare"
   version = "> 1.0.0"
   cloudflare_account_id = "${var.cloudflare_account_id}"
