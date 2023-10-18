@@ -64,3 +64,15 @@ variable "cloudflare_account_id" {
   type        = string
   nullable = false
 }
+
+variable "cloudflare_cache_max_age" {
+  description = "cloudflare cache max age"
+  type        = string
+  nullable = false
+}
+
+variable "cloudflare_cors_domains" {
+  description = "cloudflare cors domains"
+  type        = string
+  nullable = false
+}
