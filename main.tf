@@ -3,7 +3,7 @@ provider "google" {
 }
 
 module "api_gateway" {
-  source = "app.terraform.io/dotcomrow/api-gateway/cloudflare"
+  source  = "app.terraform.io/dotcomrow/api_gateway/cloudflare"
   version = "> 1.0.0"
   cloudflare_account_id = "${var.cloudflare_account_id}"
   cloudflare_cache_max_age = "${var.cloudflare_cache_max_age}"
