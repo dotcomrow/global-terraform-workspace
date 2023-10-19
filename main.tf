@@ -68,5 +68,5 @@ module "configuration" {
   audience = "${var.audience}"
   config_security_group = "${var.config_security_group}"
   cloudflare_account_id = "${var.cloudflare_account_id}"
-  cloudflare_worker_namespace_id = "${module.api_gateway.cloudflare_worker_namespace_id}"
+  cloudflare_worker_namespace_id = "${module.api_gateway.api_gateway_namespace_id}"
 }
