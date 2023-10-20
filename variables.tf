@@ -89,7 +89,7 @@ variable "cloudflare_worker_url_pattern" {
   nullable = false
 }
 
-variable "cloudflare_worker_zone_id" {
+variable "cloudflare_zone_id" {
   description = "cloudflare worker zone id"
   type        = string
   nullable = false
