@@ -30,3 +30,8 @@ module "configuration" {
   cloudflare_worker_namespace_id = "${module.api_gateway.api_gateway_namespace_id}"
 }
 
+module "mfe" {
+  source  = "app.terraform.io/dotcomrow/mfe/cloudflare"
+  version = "> 1.0.0"
+  cloudflare_account_id = "${var.cloudflare_account_id}"
+}
