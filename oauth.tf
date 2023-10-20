@@ -1,9 +1,10 @@
-resource "google_identity_platform_oauth_idp_config" "oauth_idp_config" {
-  name          = "oidc.oauth-idp-config"
-  display_name  = "domain oauth"
-  client_id     = "client-id"
-  issuer        = "issuer"
-  enabled       = true
-  client_secret = "secret"
-  project =  var.common_project_id
+resource "google_iap_brand" "project_brand" {
+  support_email     = "administrator@suncoast.systems"
+  application_title = "Cloud IAP protected Application"
+  project           = var.common_project_id
+}
+
+resource "google_iap_client" "project_client" {
+  display_name = "UI Client"
+  brand        =  google_iap_brand.project_brand.name
 }
