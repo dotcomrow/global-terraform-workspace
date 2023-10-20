@@ -10,7 +10,7 @@ module "api_gateway" {
   cloudflare_cors_domains = "${var.cloudflare_cors_domains}"
   cloudflare_worker_hostname = "${var.cloudflare_worker_hostname}"
   cloudflare_worker_url_pattern = "${var.cloudflare_worker_url_pattern}"
-  cloudflare_worker_zone_id = "${var.cloudflare_worker_zone_id}"
+  cloudflare_worker_zone_id = "${var.cloudflare_zone_id}"
 }
 
 module "configuration" {
@@ -34,4 +34,5 @@ module "mfe" {
   source  = "app.terraform.io/dotcomrow/mfe/cloudflare"
   version = "> 1.0.0"
   cloudflare_account_id = "${var.cloudflare_account_id}"
+  cloudflare_zone_id = "${var.cloudflare_zone_id}"
 }
