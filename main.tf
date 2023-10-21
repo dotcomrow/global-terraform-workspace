@@ -30,23 +30,6 @@ module "configuration" {
   cloudflare_worker_namespace_id = "${module.api_gateway.api_gateway_namespace_id}"
 }
 
-module "user_profile" {
-  source  = "app.terraform.io/dotcomrow/user_profile/google"
-  version = "> 1.0.0"
-  project_name = "user_profile"
-  project_id = "user_profile-${var.suffix}"
-  gcp_org_id = "${var.gcp_org_id}"
-  billing_account = "${var.billing_account}"
-  region  = "${var.region}"
-  bigquery_secret = "${var.bigquery_secret}"
-  python_session_secret = "${var.python_session_secret}"
-  common_project_id = "${var.common_project_id}"
-  audience = "${var.audience}"
-  config_security_group = "${var.config_security_group}"
-  cloudflare_account_id = "${var.cloudflare_account_id}"
-  cloudflare_worker_namespace_id = "${module.api_gateway.api_gateway_namespace_id}"
-}
-
 module "mfe" {
   source  = "app.terraform.io/dotcomrow/mfe/cloudflare"
   version = "> 1.0.0"
