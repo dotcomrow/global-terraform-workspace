@@ -28,7 +28,7 @@ module "configuration" {
   config_security_group = "${var.config_security_group}"
   cloudflare_account_id = "${var.cloudflare_account_id}"
   cloudflare_worker_namespace_id = "${module.api_gateway.api_gateway_namespace_id}"
-  GOOGLE_CREDENTIALS = "${env.GOOGLE_CREDENTIALS}"
+  GOOGLE_CREDENTIALS = "${GOOGLE_CREDENTIALS}"
 }
 
 module "mfe" {
