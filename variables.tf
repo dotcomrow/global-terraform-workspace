@@ -1,8 +1,3 @@
-variable "common_project_name" {
-  description = "The name of project to store global bigquery service account"
-  type = string
-}
-
 variable "region" {
   description = "The region to deploy resources"
   type        = string
