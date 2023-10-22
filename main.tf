@@ -28,6 +28,7 @@ module "configuration" {
   config_security_group = "${var.config_security_group}"
   cloudflare_account_id = "${var.cloudflare_account_id}"
   cloudflare_worker_namespace_id = "${module.api_gateway.api_gateway_namespace_id}"
+  domain = var.domain
 }
 
 module "mfe" {
