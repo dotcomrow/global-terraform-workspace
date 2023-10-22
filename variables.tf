@@ -53,6 +53,12 @@ variable "config_security_group" {
   nullable = false
 }
 
+variable "domain" {
+  description = "domain hosted in cloudflare"
+  type        = string
+  nullable = false
+}
+
 variable "cloudflare_token" {
   description = "cloudflare token"
   type        = string
@@ -67,24 +73,6 @@ variable "cloudflare_account_id" {
 
 variable "cloudflare_cache_max_age" {
   description = "cloudflare cache max age"
-  type        = string
-  nullable = false
-}
-
-variable "cloudflare_cors_domains" {
-  description = "cloudflare cors domains"
-  type        = string
-  nullable = false
-}
-
-variable "cloudflare_worker_hostname" {
-  description = "cloudflare worker hostname"
-  type        = string
-  nullable = false
-}
-
-variable "cloudflare_worker_url_pattern" {
-  description = "cloudflare worker domain"
   type        = string
   nullable = false
 }

@@ -7,9 +7,9 @@ module "api_gateway" {
   version = "> 1.0.0"
   cloudflare_account_id = "${var.cloudflare_account_id}"
   cloudflare_cache_max_age = "${var.cloudflare_cache_max_age}"
-  cloudflare_cors_domains = "${var.cloudflare_cors_domains}"
-  cloudflare_worker_hostname = "${var.cloudflare_worker_hostname}"
-  cloudflare_worker_url_pattern = "${var.cloudflare_worker_url_pattern}"
+  cloudflare_cors_domains = ".*.${var.domain}"
+  cloudflare_worker_hostname = "api.${var.domain}"
+  cloudflare_worker_url_pattern = "api.${var.domain}/*"
   cloudflare_worker_zone_id = "${var.cloudflare_zone_id}"
 }
 
