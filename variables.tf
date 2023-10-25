@@ -66,12 +66,6 @@ variable "cloudflare_account_id" {
   nullable = false
 }
 
-variable "cloudflare_cache_max_age" {
-  description = "cloudflare cache max age"
-  type        = string
-  nullable = false
-}
-
 variable "cloudflare_zone_id" {
   description = "cloudflare worker zone id"
   type        = string
