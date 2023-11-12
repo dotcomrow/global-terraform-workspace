@@ -1,7 +1,7 @@
 resource "google_artifact_registry_repository" "registry" {
   provider      = google-beta
   repository_id = "gcr.io"
-  project = "${var.common_project_id}"
+  project =     var.common_project_id
   format        = "DOCKER"
   cleanup_policy_dry_run = false
   cleanup_policies {
