@@ -1,6 +1,6 @@
 resource "google_artifact_registry_repository" "registry" {
   provider      = google-beta
-  repository_id = "gcr.io"
+  repository_id = var.registry_name
   location      = "us"
   project       =  var.common_project_id
   format        = "DOCKER"

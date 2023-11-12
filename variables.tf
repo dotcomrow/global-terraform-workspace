@@ -72,3 +72,8 @@ variable "cloudflare_zone_id" {
   nullable = false
 }
 
+variable "registry_name" {
+  description = "registry name"
+  type        = string
+  nullable = false
+}
