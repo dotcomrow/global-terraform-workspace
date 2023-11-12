@@ -32,6 +32,7 @@ module "configuration" {
   cloudflare_account_id = "${var.cloudflare_account_id}"
   cloudflare_worker_namespace_id = "${module.api_gateway.api_gateway_namespace_id}"
   domain = var.domain
+  registry_name = var.registry_name
 }
 
 module "mfe" {
