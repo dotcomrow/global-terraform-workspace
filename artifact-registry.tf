@@ -1,4 +1,4 @@
-resource "google_artifact_registry_repository" "gcr.io" {
+resource "google_artifact_registry_repository" "registry" {
   provider      = google-beta
   repository_id = "gcr.io"
   format        = "DOCKER"
