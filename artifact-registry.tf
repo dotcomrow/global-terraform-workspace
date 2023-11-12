@@ -14,3 +14,11 @@ resource "google_artifact_registry_repository" "registry" {
     }
   }
 }
+
+resource "google_artifact_registry_repository_iam_member" "member" {
+  project = google_artifact_registry_repository.registry.project
+  location = google_artifact_registry_repository.registry.location
+  repository = google_artifact_registry_repository.registry.name
+  role = "roles/artifactregistry.admin"
+  member = "serviceAccount:terraform-cloud-cicd@org-service-accounts-401323.iam.gserviceaccount.com"
+}
