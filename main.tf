@@ -2,6 +2,10 @@ provider "google" {
   region  = "${var.region}"
 }
 
+provider "google-beta" {
+  region  = "${var.region}"
+}
+
 module "api_gateway" {
   source  = "app.terraform.io/dotcomrow/api_gateway/cloudflare"
   version = "> 1.0.0"

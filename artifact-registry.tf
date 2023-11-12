@@ -1,0 +1,14 @@
+resource "google_artifact_registry_repository" "gcr.io" {
+  provider      = google-beta
+  repository_id = "gcr.io"
+  format        = "DOCKER"
+  cleanup_policy_dry_run = false
+  cleanup_policies {
+    id     = "keep-minimum-versions"
+    action = "KEEP"
+    most_recent_versions {
+      package_name_prefixes = ["svc-"]
+      keep_count            = 1
+    }
+  }
+}
