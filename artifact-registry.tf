@@ -10,7 +10,7 @@ resource "google_artifact_registry_repository" "registry" {
     action = "KEEP"
     most_recent_versions {
       package_name_prefixes = ["svc-"]
-      keep_count            = 1
+      keep_count            = 2
     }
   }
 }
