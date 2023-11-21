@@ -16,7 +16,7 @@ module "api_gateway" {
   cloudflare_worker_zone_id = "${var.cloudflare_zone_id}"
 }
 
-module "api_gateway" {
+module "lookup_codes" {
   source  = "app.terraform.io/dotcomrow/lookup_codes/cloudflare"
   version = "> 1.0.0"
   cloudflare_account_id = "${var.cloudflare_account_id}"
