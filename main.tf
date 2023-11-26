@@ -18,7 +18,7 @@ module "api_gateway" {
 
 
 
-module "user_auth" {
+module "user_auth_svc" {
   source  = "app.terraform.io/dotcomrow/user_auth_svc/google"
   version = "> 1.0.0"
   project_name = "user-auth"
