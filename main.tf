@@ -16,8 +16,6 @@ module "api_gateway" {
   cloudflare_worker_zone_id = "${var.cloudflare_zone_id}"
 }
 
-
-
 module "user_auth_svc" {
   source  = "app.terraform.io/dotcomrow/user_auth_svc/google"
   version = "> 1.0.0"
@@ -31,7 +29,6 @@ module "user_auth_svc" {
   common_project_id = "${var.common_project_id}"
   cloudflare_account_id = "${var.cloudflare_account_id}"
   cloudflare_worker_namespace_id = "${module.api_gateway.api_gateway_namespace_id}"
-  domain = "${var.domain}"
   registry_name = "${var.registry_name}"
 }
 
