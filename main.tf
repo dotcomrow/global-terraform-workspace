@@ -27,6 +27,23 @@ module "api_gateway" {
 # }
 
 module "configuration" {
+  source  = "app.terraform.io/dotcomrow/user_auth_svc/google"
+  version = "> 1.0.0"
+  project_name = "user-auth"
+  project_id = "user-auth-${var.suffix}"
+  gcp_org_id = "${var.gcp_org_id}"
+  billing_account = "${var.billing_account}"
+  region  = "${var.region}"
+  bigquery_secret = "${var.bigquery_secret}"
+  python_session_secret = "${var.python_session_secret}"
+  common_project_id = "${var.common_project_id}"
+  cloudflare_account_id = "${var.cloudflare_account_id}"
+  cloudflare_worker_namespace_id = "${module.api_gateway.api_gateway_namespace_id}"
+  domain = "${var.domain}"
+  registry_name = "${var.registry_name}"
+}
+
+module "configuration" {
   source  = "app.terraform.io/dotcomrow/configuration/google"
   version = "> 1.0.0"
   project_name = "configuration"
