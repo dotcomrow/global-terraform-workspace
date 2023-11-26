@@ -21,8 +21,8 @@ module "api_gateway" {
 module "user_auth_svc" {
   source  = "app.terraform.io/dotcomrow/user_auth_svc/google"
   version = "> 1.0.0"
-  project_name = "user-auth"
-  project_id = "user-auth-${var.suffix}"
+  project_name = "userauth"
+  project_id = "userauth-${var.suffix}"
   gcp_org_id = "${var.gcp_org_id}"
   billing_account = "${var.billing_account}"
   region  = "${var.region}"
