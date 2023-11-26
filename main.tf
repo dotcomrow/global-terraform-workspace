@@ -26,7 +26,7 @@ module "api_gateway" {
 #   cloudflare_worker_zone_id = "${var.cloudflare_zone_id}"
 # }
 
-module "user-auth" {
+module "user_auth" {
   source  = "app.terraform.io/dotcomrow/user_auth_svc/google"
   version = "> 1.0.0"
   project_name = "user-auth"
