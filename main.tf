@@ -6,15 +6,15 @@ provider "google-beta" {
   region  = "${var.region}"
 }
 
-module "api_gateway" {
-  source  = "app.terraform.io/dotcomrow/api_gateway/cloudflare"
-  version = "> 1.0.0"
-  cloudflare_account_id = "${var.cloudflare_account_id}"
-  cloudflare_cors_domains = ".*.${var.domain},.*localhost.*"
-  cloudflare_worker_hostname = "api.${var.domain}"
-  cloudflare_worker_url_pattern = "api.${var.domain}/*"
-  cloudflare_worker_zone_id = "${var.cloudflare_zone_id}"
-}
+# module "api_gateway" {
+#   source  = "app.terraform.io/dotcomrow/api_gateway/cloudflare"
+#   version = "> 1.0.0"
+#   cloudflare_account_id = "${var.cloudflare_account_id}"
+#   cloudflare_cors_domains = ".*.${var.domain},.*localhost.*"
+#   cloudflare_worker_hostname = "api.${var.domain}"
+#   cloudflare_worker_url_pattern = "api.${var.domain}/*"
+#   cloudflare_worker_zone_id = "${var.cloudflare_zone_id}"
+# }
 
 module "user_auth_svc" {
   source  = "app.terraform.io/dotcomrow/user_auth_svc/google"
