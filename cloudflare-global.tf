@@ -35,7 +35,7 @@ resource "cloudflare_api_token" "logpush_r2_token" {
   name = "logpush_r2_token"
   policy {
     permission_groups = [
-      data.cloudflare_api_token_permission_groups.r2.permissions["Workers R2 Storage Write"],
+      data.cloudflare_api_token_permission_groups.all.r2["Workers R2 Storage Write"],
     ]
     resources = {
       "com.cloudflare.api.account.*" = "*"
