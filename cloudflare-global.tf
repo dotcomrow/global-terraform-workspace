@@ -35,7 +35,7 @@ resource "cloudflare_api_token" "logpush_r2_token" {
   name = "logpush_r2_token"
   policy {
     permission_groups = [
-      data.cloudflare_api_token_permission_groups.all.permissions["Workers R2 Storage Write"],
+      data.cloudflare_api_token_permission_groups.r2.permissions["Workers R2 Storage Write"],
     ]
     resources = {
       "com.cloudflare.api.account.*" = "*"
@@ -46,9 +46,9 @@ resource "cloudflare_api_token" "logpush_r2_token" {
 resource "cloudflare_logpush_job" "workers_trace_events" {
   enabled          = true
   zone_id          = var.cloudflare_zone_id
-  name             = "workers_trace_events"
+  name             = "workers-trace-events"
   logpull_options  = "fields=DispatchNamespace,Event,EventTimestampMs,EventType,Exceptions,Logs,Outcome,ScriptName,ScriptTags&timestamps=rfc3339"
   destination_conf = "r2://cloudflare-logs/workers_trace_events/date={DATE}?account-id=${var.cloudflare_account_id}&access-key-id=${cloudflare_api_token.logpush_r2_token.id}&secret-access-key=${sha256(cloudflare_api_token.logpush_r2_token.value)}"
-  dataset          = "http_requests"
+  dataset          = "workers_trace_events"
 }
 
