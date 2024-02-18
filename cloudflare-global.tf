@@ -27,12 +27,12 @@ resource "cloudflare_ruleset" "zone_rl" {
   }
 }
 
-# resource "cloudflare_logpush_job" "workers_trace_events" {
-#   enabled          = true
-#   zone_id          = var.cloudflare_zone_id
-#   name             = "workers-trace-events"
-#   logpull_options  = "fields=DispatchNamespace,Event,EventTimestampMs,EventType,Exceptions,Logs,Outcome,ScriptName,ScriptTags&timestamps=rfc3339"
-#   destination_conf = "r2://cloudflare-logs/workers_trace_events/date={DATE}?account-id=${var.cloudflare_account_id}&access-key-id=${var.cloudflare_logs_access_key}&secret-access-key=${var.cloudflare_logs_access_secret}"
-#   dataset          = "workers_trace_events"
-# }
+resource "cloudflare_logpush_job" "workers_trace_events" {
+  enabled          = true
+  zone_id          = var.cloudflare_zone_id
+  name             = "workers-trace-events"
+  logpull_options  = "fields=DispatchNamespace,Event,EventTimestampMs,EventType,Exceptions,Logs,Outcome,ScriptName,ScriptTags&timestamps=rfc3339"
+  destination_conf = "r2://cloudflare-logs/workers_trace_events/date={DATE}?account-id=${var.cloudflare_account_id}&access-key-id=${var.cloudflare_logs_access_key}&secret-access-key=${var.cloudflare_logs_access_secret}"
+  dataset          = "workers_trace_events"
+}
 
