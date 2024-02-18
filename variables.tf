@@ -32,3 +32,15 @@ variable "registry_name" {
   type        = string
   nullable = false
 }
+
+variable "cloudflare_logs_access_secret" {
+  description = "cloudflare logs access secret"
+  type        = string
+  nullable = false
+}
+
+variable "cloudflare_logs_access_key" {
+  description = "cloudflare logs access key"
+  type        = string
+  nullable = false
+}
