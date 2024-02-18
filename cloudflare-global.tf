@@ -27,22 +27,6 @@ resource "cloudflare_ruleset" "zone_rl" {
   }
 }
 
-# Example Usage (Cloudflare R2)
-#
-# When using Cloudflare R2, no ownership challenge is required.
-data "cloudflare_api_token_permission_groups" "all" {}
-resource "cloudflare_api_token" "logpush_r2_token" {
-  name = "logpush_r2_token"
-  policy {
-    permission_groups = [
-      data.cloudflare_api_token_permission_groups.all.r2["Workers R2 Storage Write"],
-    ]
-    resources = {
-      "com.cloudflare.api.account.*" = "*"
-    }
-  }
-}
-
 resource "cloudflare_logpush_job" "workers_trace_events" {
   enabled          = true
   zone_id          = var.cloudflare_zone_id
