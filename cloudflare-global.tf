@@ -18,7 +18,7 @@ resource "cloudflare_ruleset" "zone_rl" {
       requests_to_origin = "false"
       characteristics = ["ip.src", "cf.colo.id"]
       period = 10
-      requests_per_period = 10
+      requests_per_period = 50
       mitigation_timeout = 10
     }
     expression = "(http.request.uri.path contains \"/\")"
