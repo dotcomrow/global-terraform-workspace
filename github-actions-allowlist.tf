@@ -105,7 +105,7 @@ PY
         exit 1
       fi
 
-      update_status="$(curl -sS -o "$response_file" -w "%{http_code}" \
+      update_status="$(curl -sS -o "$response_file" -w "%%{http_code}" \
         --request PUT \
         --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
         --header "Content-Type: application/json" \
@@ -143,7 +143,7 @@ PY
 
       attempt=1
       while [ "$attempt" -le "$CLOUDFLARE_LIST_BULK_POLL_MAX_ATTEMPTS" ]; do
-        bulk_status="$(curl -sS -o "$status_file" -w "%{http_code}" \
+        bulk_status="$(curl -sS -o "$status_file" -w "%%{http_code}" \
           --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
           --header "Content-Type: application/json" \
           "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/rules/lists/bulk_operations/$operation_id")"
