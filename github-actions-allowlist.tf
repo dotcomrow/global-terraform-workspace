@@ -203,25 +203,132 @@ PY
   }
 }
 
-resource "cloudflare_ruleset" "github_actions_rate_limit_bypass" {
+resource "terraform_data" "upsert_github_actions_rate_limit_bypass_rule" {
   count = var.enable_github_actions_allowlist && var.enable_github_actions_rate_limit_bypass_rule ? 1 : 0
 
-  zone_id     = var.cloudflare_zone_id
-  name        = "GitHub Actions rate limit bypass"
-  description = "Skips rate limiting for GitHub Actions traffic targeting auth-gateway app management endpoints."
-  kind        = "zone"
-  phase       = "http_request_firewall_custom"
-  depends_on  = [terraform_data.sync_github_actions_runner_items]
+  triggers_replace = [
+    local.github_actions_runner_items_hash,
+    local.github_actions_rate_limit_bypass_expression,
+    var.cloudflare_zone_id,
+  ]
 
-  rules {
-    ref         = "skip_rate_limit_for_github_actions_apps_api"
-    description = "Skip rate limiting for GitHub Actions app registration API calls."
-    expression  = local.github_actions_rate_limit_bypass_expression
-    action      = "skip"
-    enabled     = true
+  depends_on = [terraform_data.sync_github_actions_runner_items]
 
-    action_parameters {
-      products = ["rateLimit"]
+  provisioner "local-exec" {
+    interpreter = ["/bin/sh", "-c"]
+
+    command = <<-EOT
+      set -eu
+
+      python3 - <<'PY'
+import json
+import os
+import urllib.error
+import urllib.request
+
+api_base = "https://api.cloudflare.com/client/v4"
+zone_id = os.environ.get("CLOUDFLARE_ZONE_ID", "").strip()
+token = os.environ.get("CLOUDFLARE_API_TOKEN", "").strip()
+expression = os.environ.get("GITHUB_ACTIONS_BYPASS_EXPRESSION", "").strip()
+
+if not zone_id:
+    raise SystemExit("CLOUDFLARE_ZONE_ID is required.")
+if not token:
+    raise SystemExit("CLOUDFLARE_API_TOKEN is required.")
+if not expression:
+    raise SystemExit("GITHUB_ACTIONS_BYPASS_EXPRESSION is required.")
+
+rule_ref = "skip_rate_limit_for_github_actions_apps_api"
+rule_payload = {
+    "ref": rule_ref,
+    "description": "Skip rate limiting for GitHub Actions app registration API calls.",
+    "expression": expression,
+    "action": "skip",
+    "enabled": True,
+    "action_parameters": {
+        "products": ["rateLimit"],
+    },
+}
+
+entrypoint_url = f"{api_base}/zones/{zone_id}/rulesets/phases/http_request_firewall_custom/entrypoint"
+headers = {
+    "Authorization": f"Bearer {token}",
+    "Content-Type": "application/json",
+}
+
+def request_json(method: str, url: str, payload=None):
+    body = None
+    if payload is not None:
+        body = json.dumps(payload).encode("utf-8")
+    request = urllib.request.Request(url, data=body, method=method, headers=headers)
+    try:
+        with urllib.request.urlopen(request, timeout=60) as response:
+            raw = response.read().decode("utf-8")
+            return response.getcode(), json.loads(raw) if raw else {}
+    except urllib.error.HTTPError as error:
+        raw = error.read().decode("utf-8")
+        parsed = {}
+        try:
+            parsed = json.loads(raw) if raw else {}
+        except json.JSONDecodeError:
+            parsed = {"raw": raw}
+        return error.code, parsed
+
+status, entrypoint = request_json("GET", entrypoint_url)
+
+if status == 404:
+    create_payload = {
+        "name": "default",
+        "description": "Zone-level custom firewall entrypoint managed by Terraform.",
+        "kind": "zone",
+        "phase": "http_request_firewall_custom",
+        "rules": [rule_payload],
+    }
+    create_status, create_result = request_json("PUT", entrypoint_url, create_payload)
+    if create_status < 200 or create_status >= 300 or not create_result.get("success", False):
+        raise SystemExit(
+            f"Failed to create firewall custom entrypoint ruleset. HTTP {create_status}: {json.dumps(create_result)}"
+        )
+    raise SystemExit(0)
+
+if status < 200 or status >= 300 or not entrypoint.get("success", False):
+    raise SystemExit(
+        f"Failed to fetch firewall custom entrypoint ruleset. HTTP {status}: {json.dumps(entrypoint)}"
+    )
+
+entrypoint_result = entrypoint.get("result") or {}
+ruleset_id = str(entrypoint_result.get("id") or "").strip()
+if not ruleset_id:
+    raise SystemExit("Cloudflare entrypoint response did not include ruleset id.")
+
+existing_rule = None
+for candidate in entrypoint_result.get("rules") or []:
+    if str(candidate.get("ref") or "").strip() == rule_ref:
+        existing_rule = candidate
+        break
+
+if existing_rule and str(existing_rule.get("id") or "").strip():
+    rule_id = str(existing_rule.get("id")).strip()
+    patch_url = f"{api_base}/zones/{zone_id}/rulesets/{ruleset_id}/rules/{rule_id}"
+    patch_status, patch_result = request_json("PATCH", patch_url, rule_payload)
+    if patch_status < 200 or patch_status >= 300 or not patch_result.get("success", False):
+        raise SystemExit(
+            f"Failed to update GitHub Actions bypass rule. HTTP {patch_status}: {json.dumps(patch_result)}"
+        )
+else:
+    create_rule_url = f"{api_base}/zones/{zone_id}/rulesets/{ruleset_id}/rules"
+    create_rule_status, create_rule_result = request_json("POST", create_rule_url, rule_payload)
+    if create_rule_status < 200 or create_rule_status >= 300 or not create_rule_result.get("success", False):
+        raise SystemExit(
+            f"Failed to add GitHub Actions bypass rule. HTTP {create_rule_status}: {json.dumps(create_rule_result)}"
+        )
+PY
+    EOT
+
+    environment = {
+      CLOUDFLARE_API_TOKEN            = var.cloudflare_token
+      CLOUDFLARE_ZONE_ID              = var.cloudflare_zone_id
+      GITHUB_ACTIONS_BYPASS_EXPRESSION = local.github_actions_rate_limit_bypass_expression
     }
   }
 }

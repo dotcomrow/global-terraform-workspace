@@ -11,7 +11,7 @@ The synchronization is optional and disabled by default (`enable_github_actions_
 
 To keep Terraform plans responsive, list entries are synchronized through Cloudflare's asynchronous bulk list API after Terraform ensures the list resource exists.
 
-When `enable_github_actions_allowlist = true`, this workspace can also create a separate custom WAF rule (enabled by default) that skips Cloudflare rate limiting for requests matching:
+When `enable_github_actions_allowlist = true`, this workspace can also upsert a custom WAF skip rule (enabled by default) into the existing `http_request_firewall_custom` entrypoint ruleset to skip Cloudflare rate limiting for requests matching:
 - `http.host == github_actions_bypass_host` (default `login.suncoast.systems`)
 - `http.request.uri.path` starts with `github_actions_bypass_path_prefix` (default `/v1/apps`)
 - `ip.src` in the synchronized GitHub Actions list
