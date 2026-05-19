@@ -77,3 +77,27 @@ variable "github_actions_cloudflare_list_name" {
     error_message = "github_actions_cloudflare_list_name must match ^[a-z0-9_]{1,50}$."
   }
 }
+
+variable "cloudflare_list_bulk_poll_interval_seconds" {
+  description = "Polling interval in seconds when waiting for Cloudflare list bulk operations to finish."
+  type        = number
+  default     = 5
+  nullable    = false
+
+  validation {
+    condition     = var.cloudflare_list_bulk_poll_interval_seconds >= 1 && var.cloudflare_list_bulk_poll_interval_seconds <= 60
+    error_message = "cloudflare_list_bulk_poll_interval_seconds must be between 1 and 60."
+  }
+}
+
+variable "cloudflare_list_bulk_poll_max_attempts" {
+  description = "Maximum number of status polling attempts for Cloudflare list bulk operations."
+  type        = number
+  default     = 180
+  nullable    = false
+
+  validation {
+    condition     = var.cloudflare_list_bulk_poll_max_attempts >= 1 && var.cloudflare_list_bulk_poll_max_attempts <= 720
+    error_message = "cloudflare_list_bulk_poll_max_attempts must be between 1 and 720."
+  }
+}
