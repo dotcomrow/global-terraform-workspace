@@ -46,9 +46,9 @@ variable "cloudflare_logs_access_key" {
 }
 
 variable "enable_github_actions_allowlist" {
-  description = "When true, automatically fetch GitHub Actions runner CIDRs and exempt them from the global Cloudflare rate-limit rule."
+  description = "When true, enables optional GitHub Actions CIDR synchronization into a Cloudflare account list."
   type        = bool
-  default     = true
+  default     = false
   nullable    = false
 }
 

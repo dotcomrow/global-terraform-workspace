@@ -20,7 +20,7 @@ locals {
 
   github_actions_list_reference = length(local.github_actions_runner_cidrs) > 0 ? format("$%s", local.github_actions_list_name) : ""
 
-  global_rate_limit_expression = local.github_actions_list_reference != "" ? format("(http.request.uri.path contains \"/\" and not (ip.src in %s))", local.github_actions_list_reference) : "(http.request.uri.path contains \"/\")"
+  global_rate_limit_expression = "(http.request.uri.path contains \"/\" and not starts_with(http.request.uri.path, \"/v1/apps\"))"
 
   github_actions_runner_items_hash = sha256(join(",", local.github_actions_runner_cidrs))
 }
@@ -46,7 +46,7 @@ resource "terraform_data" "sync_github_actions_runner_items" {
     interpreter = ["/bin/sh", "-c"]
 
     command = <<-EOT
-      set -euo pipefail
+      set -eu
 
       payload_file="$(mktemp)"
       response_file="$(mktemp)"
