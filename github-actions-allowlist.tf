@@ -31,10 +31,13 @@ resource "cloudflare_list" "github_actions_runners" {
   name        = local.github_actions_list_name
   description = "GitHub Actions hosted runner CIDRs from ${var.github_meta_api_url}"
 
-  items = [
-    for cidr in local.github_actions_runner_cidrs : {
-      ip      = cidr
+  dynamic "item" {
+    for_each = local.github_actions_runner_cidrs
+    content {
+      value {
+        ip = item.value
+      }
       comment = "GitHub Actions hosted runner CIDR"
     }
-  ]
+  }
 }
