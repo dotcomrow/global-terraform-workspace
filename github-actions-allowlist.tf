@@ -20,9 +20,7 @@ locals {
 
   github_actions_list_reference = length(local.github_actions_runner_cidrs) > 0 ? format("$%s", local.github_actions_list_name) : ""
 
-  global_rate_limit_expression = local.github_actions_list_reference != "" ?
-  "(http.request.uri.path contains \"/\" and not (ip.src in ${local.github_actions_list_reference}))" :
-  "(http.request.uri.path contains \"/\")"
+  global_rate_limit_expression = local.github_actions_list_reference != "" ? "(http.request.uri.path contains \"/\" and not (ip.src in " + local.github_actions_list_reference + "))" : "(http.request.uri.path contains \"/\")"
 }
 
 resource "cloudflare_list" "github_actions_runners" {
@@ -39,11 +37,4 @@ resource "cloudflare_list" "github_actions_runners" {
       comment = "GitHub Actions hosted runner CIDR"
     }
   ]
-
-  lifecycle {
-    precondition {
-      condition     = length(local.github_actions_runner_cidrs) > 0
-      error_message = "GitHub meta API returned no Actions CIDR ranges."
-    }
-  }
 }
