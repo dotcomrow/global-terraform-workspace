@@ -48,7 +48,7 @@ variable "cloudflare_logs_access_key" {
 variable "enable_github_actions_allowlist" {
   description = "When true, enables optional GitHub Actions CIDR synchronization into a Cloudflare account list."
   type        = bool
-  default     = false
+  default     = true
   nullable    = false
 }
 
@@ -75,6 +75,32 @@ variable "github_actions_cloudflare_list_name" {
   validation {
     condition     = can(regex("^[a-z0-9_]{1,50}$", var.github_actions_cloudflare_list_name))
     error_message = "github_actions_cloudflare_list_name must match ^[a-z0-9_]{1,50}$."
+  }
+}
+
+variable "enable_github_actions_rate_limit_bypass_rule" {
+  description = "When true, creates a separate custom WAF rule that skips rate limiting for GitHub Actions traffic to the auth-gateway app API path."
+  type        = bool
+  default     = true
+  nullable    = false
+}
+
+variable "github_actions_bypass_host" {
+  description = "Hostname the GitHub Actions rate-limit bypass rule applies to."
+  type        = string
+  default     = "login.suncoast.systems"
+  nullable    = false
+}
+
+variable "github_actions_bypass_path_prefix" {
+  description = "Path prefix the GitHub Actions rate-limit bypass rule applies to."
+  type        = string
+  default     = "/v1/apps"
+  nullable    = false
+
+  validation {
+    condition     = startswith(var.github_actions_bypass_path_prefix, "/")
+    error_message = "github_actions_bypass_path_prefix must start with '/'."
   }
 }
 

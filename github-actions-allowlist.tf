@@ -20,9 +20,14 @@ locals {
 
   github_actions_list_reference = length(local.github_actions_runner_cidrs) > 0 ? format("$%s", local.github_actions_list_name) : ""
 
-  global_rate_limit_expression = "(http.request.uri.path contains \"/\" and not starts_with(http.request.uri.path, \"/v1/apps\"))"
-
   github_actions_runner_items_hash = sha256(join(",", local.github_actions_runner_cidrs))
+
+  github_actions_rate_limit_bypass_expression = format(
+    "(http.host eq %q and starts_with(http.request.uri.path, %q) and ip.src in %s)",
+    var.github_actions_bypass_host,
+    var.github_actions_bypass_path_prefix,
+    local.github_actions_list_reference,
+  )
 }
 
 resource "cloudflare_list" "github_actions_runners" {
@@ -194,6 +199,29 @@ PY
       CLOUDFLARE_LIST_BULK_POLL_MAX_ATTEMPTS    = tostring(var.cloudflare_list_bulk_poll_max_attempts)
       GITHUB_META_API_URL                       = var.github_meta_api_url
       GITHUB_META_API_VERSION                   = var.github_meta_api_version
+    }
+  }
+}
+
+resource "cloudflare_ruleset" "github_actions_rate_limit_bypass" {
+  count = var.enable_github_actions_allowlist && var.enable_github_actions_rate_limit_bypass_rule ? 1 : 0
+
+  zone_id     = var.cloudflare_zone_id
+  name        = "GitHub Actions rate limit bypass"
+  description = "Skips rate limiting for GitHub Actions traffic targeting auth-gateway app management endpoints."
+  kind        = "zone"
+  phase       = "http_request_firewall_custom"
+  depends_on  = [terraform_data.sync_github_actions_runner_items]
+
+  rules {
+    ref         = "skip_rate_limit_for_github_actions_apps_api"
+    description = "Skip rate limiting for GitHub Actions app registration API calls."
+    expression  = local.github_actions_rate_limit_bypass_expression
+    action      = "skip"
+    enabled     = true
+
+    action_parameters {
+      products = ["rateLimit"]
     }
   }
 }
