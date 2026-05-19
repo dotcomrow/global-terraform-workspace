@@ -4,6 +4,7 @@ resource "cloudflare_ruleset" "zone_rl" {
   description = "DDOS and cost protection for *"
   kind        = "zone"
   phase       = "http_ratelimit"
+  depends_on  = [cloudflare_list.github_actions_runners]
 
   rules {
     action = "block"
@@ -21,9 +22,8 @@ resource "cloudflare_ruleset" "zone_rl" {
       requests_per_period = 50
       mitigation_timeout = 10
     }
-    expression = "(http.request.uri.path contains \"/\")"
+    expression = local.global_rate_limit_expression
     description = "Rate limit requests to *"
     enabled = true
   }
 }
-

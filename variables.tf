@@ -44,3 +44,36 @@ variable "cloudflare_logs_access_key" {
   type        = string
   nullable = false
 }
+
+variable "enable_github_actions_allowlist" {
+  description = "When true, automatically fetch GitHub Actions runner CIDRs and exempt them from the global Cloudflare rate-limit rule."
+  type        = bool
+  default     = true
+  nullable    = false
+}
+
+variable "github_meta_api_url" {
+  description = "GitHub metadata endpoint used to retrieve current GitHub Actions runner CIDR ranges."
+  type        = string
+  default     = "https://api.github.com/meta"
+  nullable    = false
+}
+
+variable "github_meta_api_version" {
+  description = "GitHub API version header used when requesting metadata."
+  type        = string
+  default     = "2026-03-10"
+  nullable    = false
+}
+
+variable "github_actions_cloudflare_list_name" {
+  description = "Cloudflare account-level list name used to store GitHub Actions runner CIDR ranges."
+  type        = string
+  default     = "github_actions_runners"
+  nullable    = false
+
+  validation {
+    condition     = can(regex("^[a-z0-9_]{1,50}$", var.github_actions_cloudflare_list_name))
+    error_message = "github_actions_cloudflare_list_name must match ^[a-z0-9_]{1,50}$."
+  }
+}
