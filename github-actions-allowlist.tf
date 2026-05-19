@@ -22,9 +22,20 @@ locals {
 
   github_actions_runner_items_hash = sha256(join(",", local.github_actions_runner_cidrs))
 
+  github_actions_bypass_hosts = distinct([
+    for host in [var.github_actions_bypass_host, "auth-origin.suncoast.systems"] :
+    lower(trimspace(host))
+    if trimspace(host) != ""
+  ])
+
+  github_actions_bypass_hosts_expression = join(
+    " ",
+    [for host in local.github_actions_bypass_hosts : format("%q", host)],
+  )
+
   github_actions_rate_limit_bypass_expression = format(
-    "(http.host eq %q and starts_with(http.request.uri.path, %q) and ip.src in %s)",
-    var.github_actions_bypass_host,
+    "(http.host in {%s} and starts_with(http.request.uri.path, %q) and ip.src in %s)",
+    local.github_actions_bypass_hosts_expression,
     var.github_actions_bypass_path_prefix,
     local.github_actions_list_reference,
   )
@@ -241,12 +252,26 @@ if not expression:
 rule_ref = "skip_rate_limit_for_github_actions_apps_api"
 rule_payload = {
     "ref": rule_ref,
-    "description": "Skip rate limiting for GitHub Actions app registration API calls.",
+    "description": "Bypass Cloudflare firewall and rate-limiting checks for GitHub Actions app registration API calls.",
     "expression": expression,
     "action": "skip",
     "enabled": True,
     "action_parameters": {
-        "products": ["rateLimit"],
+        "ruleset": "current",
+        "phases": [
+            "http_request_firewall_managed",
+            "http_request_sbfm",
+            "http_ratelimit",
+        ],
+        "products": [
+            "bic",
+            "hot",
+            "rateLimit",
+            "securityLevel",
+            "uaBlock",
+            "waf",
+            "zoneLockdown",
+        ],
     },
 }
 
@@ -302,22 +327,35 @@ if not ruleset_id:
     raise SystemExit("Cloudflare entrypoint response did not include ruleset id.")
 
 existing_rule = None
+first_rule_id = ""
+first_other_rule_id = ""
 for candidate in entrypoint_result.get("rules") or []:
+    candidate_id = str(candidate.get("id") or "").strip()
+    if not first_rule_id and candidate_id:
+        first_rule_id = candidate_id
     if str(candidate.get("ref") or "").strip() == rule_ref:
         existing_rule = candidate
-        break
+        continue
+    if not first_other_rule_id and candidate_id:
+        first_other_rule_id = candidate_id
 
 if existing_rule and str(existing_rule.get("id") or "").strip():
     rule_id = str(existing_rule.get("id")).strip()
     patch_url = f"{api_base}/zones/{zone_id}/rulesets/{ruleset_id}/rules/{rule_id}"
-    patch_status, patch_result = request_json("PATCH", patch_url, rule_payload)
+    patch_payload = dict(rule_payload)
+    if first_other_rule_id:
+        patch_payload["position"] = {"before": first_other_rule_id}
+    patch_status, patch_result = request_json("PATCH", patch_url, patch_payload)
     if patch_status < 200 or patch_status >= 300 or not patch_result.get("success", False):
         raise SystemExit(
             f"Failed to update GitHub Actions bypass rule. HTTP {patch_status}: {json.dumps(patch_result)}"
         )
 else:
     create_rule_url = f"{api_base}/zones/{zone_id}/rulesets/{ruleset_id}/rules"
-    create_rule_status, create_rule_result = request_json("POST", create_rule_url, rule_payload)
+    create_payload = dict(rule_payload)
+    if first_rule_id:
+        create_payload["position"] = {"before": first_rule_id}
+    create_rule_status, create_rule_result = request_json("POST", create_rule_url, create_payload)
     if create_rule_status < 200 or create_rule_status >= 300 or not create_rule_result.get("success", False):
         raise SystemExit(
             f"Failed to add GitHub Actions bypass rule. HTTP {create_rule_status}: {json.dumps(create_rule_result)}"

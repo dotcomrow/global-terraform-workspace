@@ -86,7 +86,7 @@ variable "enable_github_actions_rate_limit_bypass_rule" {
 }
 
 variable "github_actions_bypass_host" {
-  description = "Hostname the GitHub Actions rate-limit bypass rule applies to."
+  description = "Primary hostname the GitHub Actions bypass rule applies to. auth-origin.suncoast.systems is always included automatically."
   type        = string
   default     = "login.suncoast.systems"
   nullable    = false

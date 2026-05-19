@@ -1,0 +1,40 @@
+name: Sync GitHub Actions Allowlist
+
+on:
+  schedule:
+    # Daily at 06:17 UTC. Adjust as needed.
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-github-actions-allowlist
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync Cloudflare list and bypass rule
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      TF_IN_AUTOMATION: "true"
+      TF_TOKEN_app_terraform_io: ${{ secrets.TFE_TOKEN }}
+      TF_VAR_enable_github_actions_allowlist: "true"
+      TF_VAR_enable_github_actions_rate_limit_bypass_rule: "true"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.3
+
+      - name: Terraform Init
+        run: terraform init -input=false -no-color
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -input=false -no-color
