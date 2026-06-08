@@ -1,4 +1,5 @@
 google_credentials_tunnel_key_json = file("/absolute/path/to/service-account-key.json")
+secret_manager_project_id         = "my-gcp-project-id"
 
 cloudflare_tunnels = {
   graphql = {

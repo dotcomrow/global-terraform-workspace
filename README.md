@@ -29,6 +29,7 @@ The workspace now uses explicit Google credentials instead of environment auto-d
 
 ```hcl
 google_credentials_tunnel_key_json = file("/path/to/service-account.json")
+secret_manager_project_id         = "gcp-project-for-tunnel-secrets"
 ```
 
 Example service account roles needed for secret writes:

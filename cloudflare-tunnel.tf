@@ -14,7 +14,7 @@ module "cloudflare_tunnel" {
 
   cloudflare_account_id = var.cloudflare_account_id
   cloudflare_zone_id    = var.cloudflare_zone_id
-  project_id           = var.common_project_id
+  project_id           = var.secret_manager_project_id
 
   name            = each.value.name
   dns_record_name = each.value.dns_record_name

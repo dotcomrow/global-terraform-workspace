@@ -10,8 +10,8 @@ variable "google_credentials_tunnel_key_json" {
   nullable    = false
 }
 
-variable "common_project_id" {
-  description = "value of common project id"
+variable "secret_manager_project_id" {
+  description = "Google project id for Secret Manager tunnel tokens."
   type        = string
   nullable = false
 }
