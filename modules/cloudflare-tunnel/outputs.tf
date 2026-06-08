@@ -15,7 +15,7 @@ output "tunnel_cname" {
 
 output "dns_record_name" {
   description = "DNS record name managed for this tunnel."
-  value       = cloudflare_dns_record.this.name
+  value       = cloudflare_record.this.name
 }
 
 output "public_hostname" {
@@ -30,7 +30,7 @@ output "tunnel_service" {
 
 output "tunnel_token" {
   description = "Cloudflared run token."
-  value       = data.cloudflare_zero_trust_tunnel_cloudflared_token.this.token
+  value       = cloudflare_zero_trust_tunnel_cloudflared.this.tunnel_token
   sensitive   = true
 }
 

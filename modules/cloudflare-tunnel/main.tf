@@ -11,13 +11,13 @@ locals {
   tunnel_service          = trimspace(var.service)
   proxied_default         = var.proxied
   gcp_secret_name_input   = trimspace(var.gcp_secret_id)
-  gcp_secret_name_slug    = regexreplace(lower(trimspace(var.name)), "[^a-z0-9_-]", "-")
+  gcp_secret_name_slug    = join("-", regexall("[a-z0-9_-]+", lower(trimspace(var.name))))
   gcp_secret_name         = local.gcp_secret_name_input != "" ? local.gcp_secret_name_input : format("cloudflare-tunnel-%s-token", local.gcp_secret_name_slug)
 }
 
 resource "random_bytes" "tunnel_secret" {
   count       = local.tunnel_secret_override == "" ? 1 : 0
-  byte_length = 32
+  length      = 32
 }
 
 resource "cloudflare_zero_trust_tunnel_cloudflared" "this" {
@@ -26,7 +26,7 @@ resource "cloudflare_zero_trust_tunnel_cloudflared" "this" {
   secret     = local.tunnel_secret_effective
 }
 
-resource "cloudflare_dns_record" "this" {
+resource "cloudflare_record" "this" {
   zone_id = var.cloudflare_zone_id
   name    = local.tunnel_dns_record_name
   type    = "CNAME"
@@ -58,12 +58,7 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "this" {
     ]
   }
 
-  depends_on = [cloudflare_dns_record.this]
-}
-
-data "cloudflare_zero_trust_tunnel_cloudflared_token" "this" {
-  account_id = var.cloudflare_account_id
-  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.this.id
+  depends_on = [cloudflare_record.this]
 }
 
 resource "google_secret_manager_secret" "tunnel_token" {
@@ -79,5 +74,5 @@ resource "google_secret_manager_secret" "tunnel_token" {
 resource "google_secret_manager_secret_version" "tunnel_token" {
   count       = var.create_gcp_secret ? 1 : 0
   secret      = google_secret_manager_secret.tunnel_token[0].id
-  secret_data = data.cloudflare_zero_trust_tunnel_cloudflared_token.this.token
+  secret_data = cloudflare_zero_trust_tunnel_cloudflared.this.tunnel_token
 }
