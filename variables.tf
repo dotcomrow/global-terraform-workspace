@@ -3,6 +3,13 @@ variable "region" {
   type        = string
 }
 
+variable "google_credentials_tunnel_key_json" {
+  description = "Google service account JSON key used for Secret Manager access."
+  type        = string
+  sensitive   = true
+  nullable    = false
+}
+
 variable "common_project_id" {
   description = "value of common project id"
   type        = string
@@ -25,6 +32,12 @@ variable "cloudflare_zone_id" {
   description = "cloudflare worker zone id"
   type        = string
   nullable = false
+}
+
+variable "domain" {
+  description = "Zone domain used to build tunnel public hostnames (for example, example.com)."
+  type        = string
+  default     = ""
 }
 
 variable "registry_name" {
@@ -125,5 +138,42 @@ variable "cloudflare_list_bulk_poll_max_attempts" {
   validation {
     condition     = var.cloudflare_list_bulk_poll_max_attempts >= 1 && var.cloudflare_list_bulk_poll_max_attempts <= 720
     error_message = "cloudflare_list_bulk_poll_max_attempts must be between 1 and 720."
+  }
+}
+
+variable "cloudflare_tunnels" {
+  description = "Reusable map of Cloudflare tunnels to create."
+  type = map(object({
+    name              = string
+    dns_record_name   = string
+    public_hostname   = optional(string, "")
+    service           = string
+    secret            = optional(string, "")
+    create_gcp_secret = optional(bool, true)
+    gcp_secret_id     = optional(string, "")
+    proxied           = optional(bool, true)
+  }))
+  default = {}
+
+  validation {
+    condition = alltrue([
+      for tunnel in values(var.cloudflare_tunnels) :
+      trimspace(tunnel.name) != "" &&
+      trimspace(tunnel.dns_record_name) != "" &&
+      trimspace(tunnel.service) != "" &&
+      can(regex("^https?://", trimspace(tunnel.service)))
+    ])
+    error_message = "Each tunnel must set name, dns_record_name, and service (service must start with http:// or https://)."
+  }
+
+  validation {
+    condition = alltrue([
+      for key, tunnel in var.cloudflare_tunnels :
+      !try(tunnel.create_gcp_secret, true) || (
+        trimspace(try(tunnel.gcp_secret_id, "")) == "" ||
+        can(regex("^[A-Za-z0-9][A-Za-z0-9_-]{0,254}$", trimspace(try(tunnel.gcp_secret_id, ""))))
+      )
+    ])
+    error_message = "gcp_secret_id must be a valid Secret Manager ID when create_gcp_secret is true."
   }
 }

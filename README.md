@@ -18,3 +18,107 @@ When `enable_github_actions_allowlist = true`, this workspace can also upsert a 
 
 ## Scheduled Sync
 A GitHub Actions workflow is included at `.github/workflows/sync-github-actions-allowlist.yml` to run `terraform apply` on a schedule and refresh the GitHub Actions CIDR list automatically.
+
+## Cloudflare Tunnels
+
+The workspace now supports managing multiple Cloudflare tunnels through a reusable module (`modules/cloudflare-tunnel`) and one map variable, `cloudflare_tunnels`.
+
+### Google credentials (explicit service key JSON)
+
+The workspace now uses explicit Google credentials instead of environment auto-detection. Set `google_credentials_tunnel_key_json` with the raw service account JSON (commonly via `file()` in your tfvars):
+
+```hcl
+google_credentials_tunnel_key_json = file("/path/to/service-account.json")
+```
+
+Example service account roles needed for secret writes:
+- Secret Manager Secret Admin (or create/access specific secret/version permissions)
+- Secret Manager Secret Version Adder
+
+### Example 1: two tunnels (inline Terraform block)
+
+```hcl
+cloudflare_tunnels = {
+  web = {
+    name              = "tf-web-tunnel"
+    dns_record_name   = "web"
+    service           = "http://127.0.0.1:8080"
+    create_gcp_secret = true
+    gcp_secret_id     = "cloudflare-tunnel-web-token"
+    proxied           = true
+  }
+
+  admin = {
+    name              = "tf-admin-tunnel"
+    dns_record_name   = "admin"
+    service           = "http://127.0.0.1:9000"
+    create_gcp_secret = false
+    proxied           = true
+  }
+}
+```
+
+### Example 2: two tunnels from `terraform.tfvars`
+
+```hcl
+cloudflare_tunnels = {
+  api = {
+    name              = "api-tunnel"
+    dns_record_name   = "api"
+    service           = "http://127.0.0.1:9001"
+    create_gcp_secret = true
+    gcp_secret_id     = "cloudflare-tunnel-api-token"
+    proxied           = true
+  }
+
+  logs = {
+    name              = "logs-tunnel"
+    dns_record_name   = "logs"
+    service           = "https://10.0.0.20:9200"
+    create_gcp_secret = true
+    proxied           = true
+  }
+}
+```
+
+Example input:
+
+```hcl
+cloudflare_tunnels = {
+  keycloak = {
+    name             = "keycloak-tunnel"
+    dns_record_name  = "keycloak"
+    service          = "http://127.0.0.1:8080"
+    secret           = ""     # optional, omitted/blank generates automatically
+    proxied          = true
+    create_gcp_secret = true
+    gcp_secret_id     = "cloudflare-tunnel-keycloak-token"
+  }
+  openobserve = {
+    name             = "openobserve-tunnel"
+    dns_record_name  = "openobserve"
+    service          = "http://127.0.0.1:5080"
+    create_gcp_secret = true
+    secret           = ""
+  }
+  another = {
+    name            = "another-tunnel"
+    dns_record_name = "another"
+    service         = "http://127.0.0.1:9000"
+    create_gcp_secret = false
+  }
+}
+```
+
+Set the global `domain` variable once (for example, `example.com`) and Terraform will build each tunnel `public_hostname` as:
+
+`dns_record_name == "@" ? domain : "${dns_record_name}.${domain}"`
+
+Outputs are keyed by the map key:
+- `cloudflare_tunnel_ids`
+- `cloudflare_tunnel_names`
+- `cloudflare_tunnel_cnames`
+- `cloudflare_tunnel_tokens` (sensitive)
+- `cloudflare_tunnel_secret_ids` (Secret Manager secret name)
+- `cloudflare_tunnel_secret_version_ids` (Secret Manager version resource IDs)
+- `cloudflare_tunnel_secret_enabled` (boolean)
