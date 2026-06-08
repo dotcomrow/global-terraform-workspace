@@ -61,7 +61,7 @@ variable "cloudflare_logs_access_key" {
 variable "enable_github_actions_allowlist" {
   description = "When true, enables optional GitHub Actions CIDR synchronization into a Cloudflare account list."
   type        = bool
-  default     = true
+  default     = false
   nullable    = false
 }
 
@@ -94,7 +94,7 @@ variable "github_actions_cloudflare_list_name" {
 variable "enable_github_actions_rate_limit_bypass_rule" {
   description = "When true, creates a separate custom WAF rule that skips rate limiting for GitHub Actions traffic to the auth-gateway app API path."
   type        = bool
-  default     = true
+  default     = false
   nullable    = false
 }
 

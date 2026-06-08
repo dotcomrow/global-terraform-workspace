@@ -21,8 +21,8 @@ jobs:
     env:
       TF_IN_AUTOMATION: "true"
       TF_TOKEN_app_terraform_io: ${{ secrets.TFE_TOKEN }}
-      TF_VAR_enable_github_actions_allowlist: "true"
-      TF_VAR_enable_github_actions_rate_limit_bypass_rule: "true"
+      TF_VAR_enable_github_actions_allowlist: "false"
+      TF_VAR_enable_github_actions_rate_limit_bypass_rule: "false"
 
     steps:
       - name: Checkout
