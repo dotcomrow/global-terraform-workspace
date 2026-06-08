@@ -46,16 +46,15 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "this" {
     }
   }
 
-  config = {
-    ingress = [
-      {
-        hostname = local.tunnel_public_hostname
-        service  = local.tunnel_service
-      },
-      {
-        service = "http_status:404"
-      },
-    ]
+  config {
+    ingress_rule {
+      hostname = local.tunnel_public_hostname
+      service  = local.tunnel_service
+    }
+
+    ingress_rule {
+      service = "http_status:404"
+    }
   }
 
   depends_on = [cloudflare_record.this]
@@ -67,7 +66,7 @@ resource "google_secret_manager_secret" "tunnel_token" {
   secret_id = local.gcp_secret_name
 
   replication {
-    automatic = true
+    auto {}
   }
 }
 
