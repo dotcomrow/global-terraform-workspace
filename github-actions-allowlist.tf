@@ -1,3 +1,4 @@
+/*
 data "http" "github_meta" {
   count = var.enable_github_actions_allowlist ? 1 : 0
 
@@ -8,6 +9,7 @@ data "http" "github_meta" {
     X-GitHub-Api-Version = var.github_meta_api_version
   }
 }
+
 
 locals {
   github_actions_list_name = var.github_actions_cloudflare_list_name
@@ -370,3 +372,5 @@ PY
     }
   }
 }
+
+*/
