@@ -61,9 +61,10 @@ def api_request(method, url, payload=None):
 
 def list_all(url):
     page = 1
+    max_per_page = 50
     while True:
         sep = "&" if "?" in url else "?"
-        status, payload = api_request("GET", f"{url}{sep}page={page}&per_page=100")
+        status, payload = api_request("GET", f"{url}{sep}page={page}&per_page={max_per_page}")
 
         if status == 404:
             return
@@ -82,6 +83,18 @@ def list_all(url):
         if current >= total:
             return
         page += 1
+
+
+def fetch_ruleset_rules(scope_prefix, scope_id, ruleset_id):
+    if not ruleset_id:
+        return []
+
+    status, payload = api_request("GET", f"{base_url}/{scope_prefix}/{scope_id}/rulesets/{ruleset_id}")
+    if not (200 <= status < 300) or not payload.get("success", False):
+        return []
+
+    result = payload.get("result") or {}
+    return result.get("rules") or []
 
 
 def require_success(status, payload, context):
@@ -106,15 +119,29 @@ def lookup_list_id():
 
 def references_target_list(rule, target_list_id):
     expression = str(rule.get("expression") or "")
-    if f"$${list_name}" in expression:
-        return True
-    if target_list_id and target_list_id in expression:
-        return True
+    list_tokens = {
+        f"$${list_name}",
+        f"$${list_name.strip().lower()}",
+        f"$${list_name.strip().upper()}",
+    }
+    quoted_name_tokens = {
+        f'"$${list_name}"',
+        f'"$${list_name.strip().lower()}"',
+        f'"$${list_name.strip().upper()}"',
+    }
 
     serialized = json.dumps(rule)
-    if f"$${list_name}" in serialized:
+    if any(token in expression for token in list_tokens):
         return True
-    if target_list_id and target_list_id in serialized:
+    if any(token in expression for token in quoted_name_tokens):
+        return True
+    if target_list_id and (target_list_id in expression):
+        return True
+    if any(token in serialized for token in list_tokens):
+        return True
+    if any(token in serialized for token in quoted_name_tokens):
+        return True
+    if target_list_id and (target_list_id in serialized):
         return True
     if str(rule.get("ref") or "") == rule_ref:
         return True
@@ -143,7 +170,11 @@ def remove_matching_rules(scope_prefix, scope_id, list_id):
     removed = 0
     for ruleset in list_all(f"{base_url}/{scope_prefix}/{scope_id}/rulesets"):
         ruleset_id = str(ruleset.get("id") or "").strip()
-        for rule in ruleset.get("rules") or []:
+        rules = ruleset.get("rules")
+        if not rules:
+            rules = fetch_ruleset_rules(scope_prefix, scope_id, ruleset_id)
+
+        for rule in rules or []:
             rule_id = str(rule.get("id") or "").strip()
             if not rule_id:
                 continue
