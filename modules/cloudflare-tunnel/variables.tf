@@ -37,11 +37,6 @@ variable "public_hostname" {
   description = "Optional override for the public hostname used in tunnel ingress."
   type        = string
   default     = ""
-
-  validation {
-    condition     = trimspace(var.public_hostname) != "" || trimspace(var.domain) != ""
-    error_message = "Set either public_hostname (explicit) or domain (inherited) for tunnel ingress host."
-  }
 }
 
 variable "domain" {

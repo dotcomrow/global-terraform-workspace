@@ -39,6 +39,13 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "this" {
   account_id = var.cloudflare_account_id
   tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.this.id
 
+  lifecycle {
+    precondition {
+      condition     = local.tunnel_public_hostname != ""
+      error_message = "Either public_hostname must be set on the tunnel entry, or domain must be set so it can be derived."
+    }
+  }
+
   config = {
     ingress = [
       {
