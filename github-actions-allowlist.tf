@@ -23,6 +23,7 @@ import os
 import sys
 import urllib.error
 import urllib.request
+import time
 
 account_id = sys.argv[1]
 zone_id = sys.argv[2]
@@ -89,7 +90,7 @@ def fetch_ruleset_rules(scope_prefix, scope_id, ruleset_id):
     if not ruleset_id:
         return []
 
-    status, payload = api_request("GET", f"{base_url}/{scope_prefix}/{scope_id}/rulesets/{ruleset_id}")
+    status, payload = api_request("GET", f"{base_url}/{scope_prefix}/{scope_id}/rulesets/{ruleset_id}?include=rules")
     if not (200 <= status < 300) or not payload.get("success", False):
         return []
 
@@ -186,6 +187,31 @@ def remove_matching_rules(scope_prefix, scope_id, list_id):
     return removed
 
 
+def scan_matching_rules(scope_prefix, scope_id, list_id):
+    matches = []
+    for ruleset in list_all(f"{base_url}/{scope_prefix}/{scope_id}/rulesets"):
+        ruleset_id = str(ruleset.get("id") or "").strip()
+        rules = ruleset.get("rules")
+        if not rules:
+            rules = fetch_ruleset_rules(scope_prefix, scope_id, ruleset_id)
+
+        for rule in rules or []:
+            rule_id = str(rule.get("id") or "").strip()
+            if not rule_id:
+                continue
+            if not references_target_list(rule, list_id):
+                continue
+            matches.append({
+                "scope": scope_prefix.rstrip("s"),
+                "scope_id": scope_id,
+                "ruleset_id": ruleset_id,
+                "rule_id": rule_id,
+                "rule_ref": str(rule.get("ref") or ""),
+                "expression": str(rule.get("expression") or ""),
+            })
+    return matches
+
+
 def cleanup_entrypoint_rule(list_id):
     entrypoint_url = f"{base_url}/zones/{zone_id}/rulesets/phases/http_request_firewall_custom/entrypoint"
     status, payload = api_request("GET", entrypoint_url)
@@ -262,6 +288,28 @@ cleanup_entrypoint_rule(list_id)
 account_rules_removed = remove_matching_rules("accounts", account_id, list_id)
 if account_rules_removed:
     print(f"Removed {account_rules_removed} account ruleset rule(s) referencing '{list_name}'.")
+
+# Verify no remaining references to avoid Cloudflare API delete failures.
+remaining = []
+for _ in range(0, 6):
+    remaining = []
+    remaining.extend(scan_matching_rules("zones", zone_id, list_id))
+    remaining.extend(scan_matching_rules("accounts", account_id, list_id))
+    if not remaining:
+        break
+
+    print("Waiting for Cloudflare to flush rule-reference updates before deleting the list...")
+    time.sleep(5)
+
+if remaining:
+    print("The GitHub Actions list is still referenced by the following rules:")
+    for match in remaining:
+        print(
+            f"  - scope={match['scope']} scope_id={match['scope_id']} "
+            f"ruleset={match['ruleset_id']} rule={match['rule_id']} ref={match['rule_ref']}\n"
+            f"    expression={match['expression']}"
+        )
+    raise SystemExit(1)
 
 # If the list still has references, this delete fails and surfaces remaining dependencies.
 cleanup_list(list_id)
