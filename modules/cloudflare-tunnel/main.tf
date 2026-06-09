@@ -115,14 +115,14 @@ JSON
           --header "Content-Type: application/json" \
           --header "Authorization: Bearer $${VAULT_SYNC_EVENT_TOKEN}" \
           --data "$${payload}" \
-          --write-out '%{http_code}' \
+          --write-out '%%{http_code}' \
           --output "$${response_file}" \
           "$${VAULT_SYNC_EVENT_URL}" || echo 000)"
       else
         status="$$(curl --silent --show-error --location --request POST \
           --header "Content-Type: application/json" \
           --data "$${payload}" \
-          --write-out '%{http_code}' \
+          --write-out '%%{http_code}' \
           --output "$${response_file}" \
           "$${VAULT_SYNC_EVENT_URL}" || echo 000)"
       fi
