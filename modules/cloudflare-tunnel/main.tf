@@ -108,10 +108,10 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
         printf '%s' "$${1}" | tr -d '\r\n' | sed 's/^\\s*//;s/\\s*$//'
       }
 
-      vault_sync_service_name="${VAULT_SYNC_SERVICE_NAME:-vault-sync-run-container}"
-      vault_sync_service_region="${VAULT_SYNC_SERVICE_REGION:-}"
-      vault_sync_event_url_secret_name="${VAULT_SYNC_EVENT_URL_SECRET_NAME:-vault-sync-event-url}"
-      vault_sync_event_token_secret_name="${VAULT_SYNC_EVENT_TOKEN_SECRET_NAME:-vault-sync-event-token}"
+      vault_sync_service_name="$${VAULT_SYNC_SERVICE_NAME:-vault-sync-run-container}"
+      vault_sync_service_region="$${VAULT_SYNC_SERVICE_REGION:-}"
+      vault_sync_event_url_secret_name="$${VAULT_SYNC_EVENT_URL_SECRET_NAME:-vault-sync-event-url}"
+      vault_sync_event_token_secret_name="$${VAULT_SYNC_EVENT_TOKEN_SECRET_NAME:-vault-sync-event-token}"
 
       discover_event_url() {
         local project="$${1:-}"
