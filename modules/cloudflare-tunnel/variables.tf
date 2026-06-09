@@ -81,7 +81,7 @@ variable "proxied" {
 }
 
 variable "emit_tunnel_secret_sync_events" {
-  description = "When true, emit a synthetic Vault sync event for each secret version created."
+  description = "When true, emit a synthetic Vault sync event for each secret version created. Emission also runs automatically when vault_sync_event_url is set."
   type        = bool
   default     = false
 }

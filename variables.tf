@@ -17,7 +17,7 @@ variable "secret_manager_project_id" {
 }
 
 variable "emit_tunnel_secret_sync_events" {
-  description = "When true, emit a synthetic vault-sync event to the provided endpoint for each created tunnel secret version."
+  description = "Backward-compatible switch for synthetic vault-sync events. Events are emitted when this is true or when a vault_sync_event_url is configured."
   type        = bool
   default     = false
   nullable    = false

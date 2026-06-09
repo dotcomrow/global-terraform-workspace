@@ -134,6 +134,8 @@ vault_sync_event_url          = "https://vault-sync-run-container-<hash>-<ns>.ru
 vault_sync_event_token        = "optional_bearer_token"
 ```
 
+Setting just `vault_sync_event_url` to a non-empty value is also enough to enable emission.
+
 When enabled, the tunnel module posts a single JSON event per created secret version directly to the endpoint using:
 - `protoPayload.methodName = google.cloud.secretmanager.v1.SecretManagerService.AddSecretVersion`
 - `protoPayload.resourceName = projects/<project>/secrets/<secret_name>/versions/<version>`

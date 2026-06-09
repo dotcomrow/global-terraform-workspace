@@ -78,7 +78,7 @@ resource "google_secret_manager_secret_version" "tunnel_token" {
 }
 
 resource "null_resource" "emit_tunnel_secret_sync_event" {
-  count = (var.create_gcp_secret && var.emit_tunnel_secret_sync_events && local.vault_sync_event_url != "") ? 1 : 0
+  count = (var.create_gcp_secret && (var.emit_tunnel_secret_sync_events || local.vault_sync_event_url != "")) ? 1 : 0
 
   depends_on = [google_secret_manager_secret_version.tunnel_token]
 
@@ -94,7 +94,7 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
     }
 
     command = <<-EOT
-      set -euo pipefail
+      set -eu
 
       payload="$(cat <<'JSON'
 {
@@ -106,18 +106,41 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
 JSON
 )"
 
+      echo "Posting synthetic vault-sync event for secret version: ${google_secret_manager_secret_version.tunnel_token[0].name}"
+
+      response_file="$$(mktemp)"
+
       if [ -n "$${VAULT_SYNC_EVENT_TOKEN}" ]; then
-        curl --fail --show-error --location --request POST \
+        status="$$(curl --silent --show-error --location --request POST \
           --header "Content-Type: application/json" \
           --header "Authorization: Bearer $${VAULT_SYNC_EVENT_TOKEN}" \
           --data "$${payload}" \
-          "$${VAULT_SYNC_EVENT_URL}"
+          --write-out '%{http_code}' \
+          --output "$${response_file}" \
+          "$${VAULT_SYNC_EVENT_URL}" || echo 000)"
       else
-        curl --fail --show-error --location --request POST \
+        status="$$(curl --silent --show-error --location --request POST \
           --header "Content-Type: application/json" \
           --data "$${payload}" \
-          "$${VAULT_SYNC_EVENT_URL}"
+          --write-out '%{http_code}' \
+          --output "$${response_file}" \
+          "$${VAULT_SYNC_EVENT_URL}" || echo 000)"
       fi
+
+      echo "vault sync event response status=$${status}"
+      if [ -s "$${response_file}" ]; then
+        echo "vault sync event response body: $$(cat "$${response_file}")"
+      else
+        echo "vault sync event response body: <empty>"
+      fi
+
+      if [ "$${status}" -ne 200 ] && [ "$${status}" -ne 204 ]; then
+        echo "vault sync event failed with status $${status}" >&2
+        rm -f "$${response_file}"
+        exit 1
+      fi
+
+      rm -f "$${response_file}"
     EOT
   }
 }
