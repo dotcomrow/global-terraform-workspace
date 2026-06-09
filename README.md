@@ -138,7 +138,13 @@ vault_sync_event_fallback_sync_all = false
 # to force a full resync from vault-sync's side.
 ```
 
-Setting just `vault_sync_event_url` to a non-empty value is also enough to enable emission.
+Important:
+
+- `vault_sync_event_url` is required for each run to enable emission. Without it, no event publication runs.
+- For protected Cloud Run endpoints, set `vault_sync_event_token` to a short-lived **identity token** (for example `gcloud auth print-identity-token`) that can invoke the `vault-sync` service.
+- The synthetic event call is now strict: only HTTP `200` is treated as success. `204` is treated as a warning that the event was accepted but ignored.
+
+Setting just `vault_sync_event_url` to a non-empty value is enough to enable emission, but you must include a valid bearer token for most protected endpoints.
 
 Terraform only auto-loads `terraform.tfvars` and `*.auto.tfvars`; other filenames (such as `cloudflare-tunnels.tfvars`) are ignored unless you pass `-var-file`.
 

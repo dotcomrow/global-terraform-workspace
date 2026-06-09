@@ -153,7 +153,7 @@ JSON
         echo "vault sync event response body: <empty>"
       fi
 
-      if [ "$${status}" -ne 200 ] && [ "$${status}" -ne 204 ]; then
+      if [ "$${status}" -ne 200 ]; then
         echo "vault sync event failed with status $${status}" >&2
 
         if [ "$${VAULT_SYNC_EVENT_FALLBACK_SYNC_ALL}" = "true" ]; then
