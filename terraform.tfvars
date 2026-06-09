@@ -1,3 +1,6 @@
+emit_tunnel_secret_sync_events = true
+vault_sync_event_fallback_sync_all = true
+
 cloudflare_tunnels = {
   graphql = {
     name              = "graphql-origin-tunnel"

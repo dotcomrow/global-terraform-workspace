@@ -15,7 +15,9 @@ locals {
   gcp_secret_name         = local.gcp_secret_name_input != "" ? local.gcp_secret_name_input : format("cloudflare-tunnel-%s-token", local.gcp_secret_name_slug)
   vault_sync_event_url    = trimspace(var.vault_sync_event_url)
   vault_sync_event_fallback_sync_all = var.vault_sync_event_fallback_sync_all
-  emit_tunnel_secret_events = var.emit_tunnel_secret_sync_events || local.vault_sync_event_url != ""
+  vault_sync_event_url_env  = local.vault_sync_event_url != "" ? { VAULT_SYNC_EVENT_URL = local.vault_sync_event_url } : {}
+  vault_sync_event_token_env = var.vault_sync_event_token != "" ? { VAULT_SYNC_EVENT_TOKEN = var.vault_sync_event_token } : {}
+  emit_tunnel_secret_events = var.emit_tunnel_secret_sync_events
 }
 
 resource "random_bytes" "tunnel_secret" {
@@ -84,27 +86,106 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
 
   depends_on = [google_secret_manager_secret_version.tunnel_token]
 
-  lifecycle {
-    precondition {
-      condition     = !(var.emit_tunnel_secret_sync_events && trimspace(var.vault_sync_event_url) == "")
-      error_message = "vault_sync_event_url must be set when emit_tunnel_secret_sync_events = true."
-    }
-  }
-
   triggers = {
     version_id = google_secret_manager_secret_version.tunnel_token[0].id
-    event_url  = local.vault_sync_event_url
+    emit       = tostring(local.emit_tunnel_secret_events)
   }
 
   provisioner "local-exec" {
-    environment = {
-      VAULT_SYNC_EVENT_URL   = local.vault_sync_event_url
-      VAULT_SYNC_EVENT_TOKEN = var.vault_sync_event_token
-      VAULT_SYNC_EVENT_FALLBACK_SYNC_ALL = var.vault_sync_event_fallback_sync_all ? "true" : "false"
-    }
+    environment = merge(
+      {
+        GCP_PROJECT_ID                      = var.project_id
+        VAULT_SYNC_EVENT_FALLBACK_SYNC_ALL   = var.vault_sync_event_fallback_sync_all ? "true" : "false"
+      },
+      local.vault_sync_event_url_env,
+      local.vault_sync_event_token_env,
+    )
 
     command = <<-EOT
       set -eu
+
+      trim() {
+        printf '%s' "$${1}" | tr -d '\r\n' | sed 's/^\\s*//;s/\\s*$//'
+      }
+
+      vault_sync_service_name="${VAULT_SYNC_SERVICE_NAME:-vault-sync-run-container}"
+      vault_sync_service_region="${VAULT_SYNC_SERVICE_REGION:-}"
+      vault_sync_event_url_secret_name="${VAULT_SYNC_EVENT_URL_SECRET_NAME:-vault-sync-event-url}"
+      vault_sync_event_token_secret_name="${VAULT_SYNC_EVENT_TOKEN_SECRET_NAME:-vault-sync-event-token}"
+
+      discover_event_url() {
+        local project="$${1:-}"
+        local region="$${2:-}"
+        local service="$${3:-}"
+        local url_secret_name="$${4:-$vault_sync_event_url_secret_name}"
+        local discovered=""
+
+        if [ -n "$${service}" ] && [ -n "$${project}" ] && command -v gcloud >/dev/null 2>&1; then
+          if [ -n "$${region}" ]; then
+            discovered="$$(gcloud run services describe "$${service}" \
+              --project="$${project}" --region="$${region}" --platform=managed \
+              --format='value(status.url)' 2>/dev/null || true)"
+          else
+            discovered="$$(gcloud run services list --platform=managed \
+              --project="$${project}" --filter="metadata.name=$${service}" \
+              --format='value(status.url)' 2>/dev/null | head -n1 || true)"
+          fi
+        fi
+
+        if [ -z "$${discovered}" ] && [ -n "$${project}" ] && [ -n "$${url_secret_name}" ] && command -v gcloud >/dev/null 2>&1; then
+          discovered="$$(gcloud secrets versions access latest \
+            --project="$${project}" --secret="$${url_secret_name}" 2>/dev/null | tr -d '\r\n' || true)"
+        fi
+
+        trim "$${discovered}"
+      }
+
+      discover_event_token() {
+        local project="$${1:-}"
+        local audience="$${2:-}"
+        local token_secret_name="$${3:-$vault_sync_event_token_secret_name}"
+        local discovered=""
+
+        if [ -n "$${audience}" ] && command -v gcloud >/dev/null 2>&1; then
+          discovered="$$(gcloud auth print-identity-token --audiences "$${audience}" 2>/dev/null || true)"
+        fi
+
+        if [ -z "$${discovered}" ] && [ -n "$${project}" ] && [ -n "$${token_secret_name}" ] && command -v gcloud >/dev/null 2>&1; then
+          discovered="$$(gcloud secrets versions access latest \
+            --project="$${project}" --secret="$${token_secret_name}" 2>/dev/null | tr -d '\r\n' || true)"
+        fi
+
+        trim "$${discovered}"
+      }
+
+      run_sync_all() {
+        local target="$${1:-$${sync_all_url}}"
+        local sync_all_status
+
+        if [ -n "$${VAULT_SYNC_EVENT_TOKEN}" ]; then
+          sync_all_status="$$(curl --silent --show-error --location --request POST \
+            --header 'Content-Type: application/json' \
+            --header "Authorization: Bearer $${VAULT_SYNC_EVENT_TOKEN}" \
+            --write-out '%%{http_code}' \
+            --output "$${response_file}" \
+            "$${target}" || echo 000)"
+        else
+          sync_all_status="$$(curl --silent --show-error --location --request POST \
+            --header 'Content-Type: application/json' \
+            --write-out '%%{http_code}' \
+            --output "$${response_file}" \
+            "$${target}" || echo 000)"
+        fi
+
+        echo "vault sync-all status=$${sync_all_status}"
+        if [ "$${sync_all_status}" -ne 200 ] && [ "$${sync_all_status}" -ne 204 ]; then
+          echo "vault sync-all failed with status $${sync_all_status}" >&2
+          return 1
+        fi
+
+        echo "vault sync-all completed."
+        return 0
+      }
 
       audit_payload="$(cat <<JSON
       {
@@ -145,8 +226,24 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
       echo "Posting synthetic vault-sync event for secret version: ${google_secret_manager_secret_version.tunnel_token[0].name}"
 
       response_file="$$(mktemp)"
+      event_url="$$(trim "$${VAULT_SYNC_EVENT_URL}")"
 
-      event_url="$${VAULT_SYNC_EVENT_URL%/}"
+      if [ -z "$${event_url}" ] && [ -n "$${GCP_PROJECT_ID}" ] && command -v gcloud >/dev/null 2>&1; then
+        event_url="$$(discover_event_url "$${GCP_PROJECT_ID}" "$${vault_sync_service_region}" "$${vault_sync_service_name}" "$${vault_sync_event_url_secret_name}")"
+      fi
+
+      event_url="$$(trim "$${event_url}")"
+      event_url="$${event_url%/}"
+      if [ -n "$${event_url}" ] && [ -z "$${VAULT_SYNC_EVENT_TOKEN}" ] && command -v gcloud >/dev/null 2>&1; then
+        VAULT_SYNC_EVENT_TOKEN="$$(discover_event_token "$${GCP_PROJECT_ID}" "$${event_url}")"
+      fi
+
+      if [ -z "$${event_url}" ]; then
+        echo "vault sync event URL could not be resolved. Set VAULT_SYNC_EVENT_URL or provide gcloud-accessible Vault sync service/secret names." >&2
+        rm -f "$${response_file}"
+        exit 1
+      fi
+
       sync_all_url="$${event_url}/sync-all"
 
       if [ -n "$${VAULT_SYNC_EVENT_TOKEN}" ]; then
@@ -175,38 +272,26 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
 
       if [ "$${status}" -ne 200 ]; then
         echo "vault sync event failed with status $${status}" >&2
-
         if [ "$${VAULT_SYNC_EVENT_FALLBACK_SYNC_ALL}" = "true" ]; then
           echo "Attempting fallback sync-all to recover..."
-
-          if [ -n "$${VAULT_SYNC_EVENT_TOKEN}" ]; then
-            sync_all_status="$$(curl --silent --show-error --location --request POST \
-              --header 'Content-Type: application/json' \
-              --header "Authorization: Bearer $${VAULT_SYNC_EVENT_TOKEN}" \
-              --write-out '%%{http_code}' \
-              --output "$${response_file}" \
-              "$${sync_all_url}" || echo 000)"
-          else
-            sync_all_status="$$(curl --silent --show-error --location --request POST \
-              --header 'Content-Type: application/json' \
-              --write-out '%%{http_code}' \
-              --output "$${response_file}" \
-              "$${sync_all_url}" || echo 000)"
-          fi
-
-          echo "vault sync fallback status=$${sync_all_status}"
-          if [ "$${sync_all_status}" -ne 200 ] && [ "$${sync_all_status}" -ne 204 ]; then
-            echo "vault sync fallback failed with status $${sync_all_status}" >&2
+          run_sync_all "$${sync_all_url}" || {
             rm -f "$${response_file}"
             exit 1
-          fi
-          echo "vault sync fallback completed."
+          }
           rm -f "$${response_file}"
           exit 0
         fi
 
         rm -f "$${response_file}"
         exit 1
+      fi
+
+      if [ "$${VAULT_SYNC_EVENT_FALLBACK_SYNC_ALL}" = "true" ]; then
+        echo "Event call succeeded; running sync-all for deterministic reconciliation."
+        run_sync_all "$${sync_all_url}" || {
+          rm -f "$${response_file}"
+          exit 1
+        }
       fi
 
       rm -f "$${response_file}"
