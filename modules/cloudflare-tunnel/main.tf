@@ -13,6 +13,7 @@ locals {
   gcp_secret_name_input   = trimspace(var.gcp_secret_id)
   gcp_secret_name_slug    = join("-", regexall("[a-z0-9_-]+", lower(trimspace(var.name))))
   gcp_secret_name         = local.gcp_secret_name_input != "" ? local.gcp_secret_name_input : format("cloudflare-tunnel-%s-token", local.gcp_secret_name_slug)
+  vault_sync_event_url    = trimspace(var.vault_sync_event_url)
 }
 
 resource "random_bytes" "tunnel_secret" {
@@ -74,4 +75,49 @@ resource "google_secret_manager_secret_version" "tunnel_token" {
   count       = var.create_gcp_secret ? 1 : 0
   secret      = google_secret_manager_secret.tunnel_token[0].id
   secret_data = cloudflare_zero_trust_tunnel_cloudflared.this.tunnel_token
+}
+
+resource "null_resource" "emit_tunnel_secret_sync_event" {
+  count = (var.create_gcp_secret && var.emit_tunnel_secret_sync_events && local.vault_sync_event_url != "") ? 1 : 0
+
+  depends_on = [google_secret_manager_secret_version.tunnel_token]
+
+  triggers = {
+    version_id = google_secret_manager_secret_version.tunnel_token[0].id
+    event_url  = local.vault_sync_event_url
+  }
+
+  provisioner "local-exec" {
+    environment = {
+      VAULT_SYNC_EVENT_URL   = local.vault_sync_event_url
+      VAULT_SYNC_EVENT_TOKEN = var.vault_sync_event_token
+    }
+
+    command = <<-EOT
+      set -euo pipefail
+
+      payload="$(cat <<'JSON'
+{
+  "protoPayload": {
+    "methodName": "google.cloud.secretmanager.v1.SecretManagerService.AddSecretVersion",
+    "resourceName": "${google_secret_manager_secret_version.tunnel_token[0].name}"
+  }
+}
+JSON
+)"
+
+      if [ -n "${VAULT_SYNC_EVENT_TOKEN}" ]; then
+        curl --fail --show-error --location --request POST \
+          --header "Content-Type: application/json" \
+          --header "Authorization: Bearer ${VAULT_SYNC_EVENT_TOKEN}" \
+          --data "${payload}" \
+          "${VAULT_SYNC_EVENT_URL}"
+      else
+        curl --fail --show-error --location --request POST \
+          --header "Content-Type: application/json" \
+          --data "${payload}" \
+          "${VAULT_SYNC_EVENT_URL}"
+      fi
+    EOT
+  }
 }

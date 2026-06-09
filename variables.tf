@@ -16,6 +16,26 @@ variable "secret_manager_project_id" {
   nullable = false
 }
 
+variable "emit_tunnel_secret_sync_events" {
+  description = "When true, emit a synthetic vault-sync event to the provided endpoint for each created tunnel secret version."
+  type        = bool
+  default     = false
+  nullable    = false
+}
+
+variable "vault_sync_event_url" {
+  description = "Webhook URL for synthetic vault-sync events (for example https://vault-sync-run-container-.../)."
+  type        = string
+  default     = ""
+}
+
+variable "vault_sync_event_token" {
+  description = "Optional bearer token for the vault sync webhook."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 variable "cloudflare_token" {
   description = "cloudflare token"
   type        = string

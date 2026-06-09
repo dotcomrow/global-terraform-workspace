@@ -79,3 +79,22 @@ variable "proxied" {
   type        = bool
   default     = true
 }
+
+variable "emit_tunnel_secret_sync_events" {
+  description = "When true, emit a synthetic Vault sync event for each secret version created."
+  type        = bool
+  default     = false
+}
+
+variable "vault_sync_event_url" {
+  description = "Optional webhook URL for synthetic Vault sync events."
+  type        = string
+  default     = ""
+}
+
+variable "vault_sync_event_token" {
+  description = "Optional bearer token for vault sync webhook calls."
+  type        = string
+  sensitive   = true
+  default     = ""
+}

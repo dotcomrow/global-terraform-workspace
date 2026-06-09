@@ -25,4 +25,7 @@ module "cloudflare_tunnel" {
   create_gcp_secret = each.value.create_gcp_secret
   gcp_secret_id     = each.value.gcp_secret_id
   proxied         = each.value.proxied
+  emit_tunnel_secret_sync_events = var.emit_tunnel_secret_sync_events
+  vault_sync_event_url           = var.vault_sync_event_url
+  vault_sync_event_token         = var.vault_sync_event_token
 }

@@ -123,3 +123,21 @@ Outputs are keyed by the map key:
 - `cloudflare_tunnel_secret_ids` (Secret Manager secret name)
 - `cloudflare_tunnel_secret_version_ids` (Secret Manager version resource IDs)
 - `cloudflare_tunnel_secret_enabled` (boolean)
+
+### Synthetic Vault sync events
+
+If you want tunnel secret creation to be picked up by the existing Vault sync pipeline without changing its handler code, enable the synthetic event path:
+
+```hcl
+emit_tunnel_secret_sync_events = true
+vault_sync_event_url          = "https://vault-sync-run-container-<hash>-<ns>.run.app"
+vault_sync_event_token        = "optional_bearer_token"
+```
+
+When enabled, the tunnel module posts a single JSON event per created secret version directly to the endpoint using:
+- `protoPayload.methodName = google.cloud.secretmanager.v1.SecretManagerService.AddSecretVersion`
+- `protoPayload.resourceName = projects/<project>/secrets/<secret_name>/versions/<version>`
+
+No CloudEvent headers are required for this path; this maps to the service’s manual direct JSON normalization path.
+
+Keep this disabled unless your endpoint is intentionally accepting synthetic events, since it runs a `local-exec` in Terraform during apply.
