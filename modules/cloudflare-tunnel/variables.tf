@@ -84,12 +84,22 @@ variable "emit_tunnel_secret_sync_events" {
   description = "When true, emit a synthetic Vault sync event for each secret version created. Emission also runs automatically when vault_sync_event_url is set."
   type        = bool
   default     = false
+
+  validation {
+    condition     = !var.emit_tunnel_secret_sync_events || trimspace(var.vault_sync_event_url) != ""
+    error_message = "vault_sync_event_url must be set when emit_tunnel_secret_sync_events is true."
+  }
 }
 
 variable "vault_sync_event_url" {
   description = "Optional webhook URL for synthetic Vault sync events."
   type        = string
   default     = ""
+
+  validation {
+    condition     = var.vault_sync_event_url == "" || can(regex("^https://", trimspace(var.vault_sync_event_url)))
+    error_message = "vault_sync_event_url must be blank or a valid https URL."
+  }
 }
 
 variable "vault_sync_event_token" {

@@ -21,12 +21,22 @@ variable "emit_tunnel_secret_sync_events" {
   type        = bool
   default     = false
   nullable    = false
+
+  validation {
+    condition     = !var.emit_tunnel_secret_sync_events || trimspace(var.vault_sync_event_url) != ""
+    error_message = "vault_sync_event_url must be set when emit_tunnel_secret_sync_events is true."
+  }
 }
 
 variable "vault_sync_event_url" {
   description = "Webhook URL for synthetic vault-sync events (for example https://vault-sync-run-container-.../)."
   type        = string
   default     = ""
+
+  validation {
+    condition     = var.vault_sync_event_url == "" || can(regex("^https://", trimspace(var.vault_sync_event_url)))
+    error_message = "vault_sync_event_url must be blank or a valid https URL."
+  }
 }
 
 variable "vault_sync_event_token" {

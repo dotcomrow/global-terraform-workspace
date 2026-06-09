@@ -14,6 +14,7 @@ locals {
   gcp_secret_name_slug    = join("-", regexall("[a-z0-9_-]+", lower(trimspace(var.name))))
   gcp_secret_name         = local.gcp_secret_name_input != "" ? local.gcp_secret_name_input : format("cloudflare-tunnel-%s-token", local.gcp_secret_name_slug)
   vault_sync_event_url    = trimspace(var.vault_sync_event_url)
+  emit_tunnel_secret_events = var.emit_tunnel_secret_sync_events || local.vault_sync_event_url != ""
 }
 
 resource "random_bytes" "tunnel_secret" {
@@ -78,7 +79,7 @@ resource "google_secret_manager_secret_version" "tunnel_token" {
 }
 
 resource "null_resource" "emit_tunnel_secret_sync_event" {
-  count = (var.create_gcp_secret && (var.emit_tunnel_secret_sync_events || local.vault_sync_event_url != "")) ? 1 : 0
+  count = (var.create_gcp_secret && local.emit_tunnel_secret_events) ? 1 : 0
 
   depends_on = [google_secret_manager_secret_version.tunnel_token]
 

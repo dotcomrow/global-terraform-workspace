@@ -126,7 +126,7 @@ Outputs are keyed by the map key:
 
 ### Synthetic Vault sync events
 
-If you want tunnel secret creation to be picked up by the existing Vault sync pipeline without changing its handler code, enable the synthetic event path:
+If you want tunnel secret creation to be picked up by the existing Vault sync pipeline without changing its handler code, enable the synthetic event path in your active `terraform.tfvars` (or a `*.auto.tfvars` file):
 
 ```hcl
 emit_tunnel_secret_sync_events = true
@@ -135,6 +135,8 @@ vault_sync_event_token        = "optional_bearer_token"
 ```
 
 Setting just `vault_sync_event_url` to a non-empty value is also enough to enable emission.
+
+Terraform only auto-loads `terraform.tfvars` and `*.auto.tfvars`; other filenames (such as `cloudflare-tunnels.tfvars`) are ignored unless you pass `-var-file`.
 
 When enabled, the tunnel module posts a single JSON event per created secret version directly to the endpoint using:
 - `protoPayload.methodName = google.cloud.secretmanager.v1.SecretManagerService.AddSecretVersion`

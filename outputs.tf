@@ -63,10 +63,31 @@ output "cloudflare_tunnel_secret_version_ids" {
   }
 }
 
+output "cloudflare_tunnel_vault_sync_event_urls" {
+  description = "Vault-sync webhook URLs configured on each tunnel module instance."
+  value = {
+    for k, tunnel in module.cloudflare_tunnel :
+    k => tunnel.vault_sync_event_url
+  }
+}
+
+output "cloudflare_tunnel_vault_sync_event_enabled" {
+  description = "Whether synthetic vault-sync event emission is enabled per tunnel module instance."
+  value = {
+    for k, tunnel in module.cloudflare_tunnel :
+    k => tunnel.vault_sync_event_enabled
+  }
+}
+
 output "cloudflare_tunnel_secret_enabled" {
   description = "Whether Google Secret Manager creation is enabled per tunnel key."
   value = {
     for k, tunnel in module.cloudflare_tunnel :
     k => tunnel.gcp_secret_created
   }
+}
+
+output "vault_sync_synthetic_events_enabled" {
+  description = "Whether synthetic Vault-sync events are enabled for this workspace."
+  value       = var.emit_tunnel_secret_sync_events || trimspace(var.vault_sync_event_url) != ""
 }

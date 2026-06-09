@@ -48,3 +48,13 @@ output "gcp_secret_created" {
   description = "Whether Google Secret Manager secret was created for this tunnel."
   value       = var.create_gcp_secret
 }
+
+output "vault_sync_event_enabled" {
+  description = "Whether this module instance is configured to emit synthetic vault-sync events."
+  value       = var.create_gcp_secret && (var.emit_tunnel_secret_sync_events || trimspace(var.vault_sync_event_url) != "")
+}
+
+output "vault_sync_event_url" {
+  description = "Vault-sync webhook URL used for synthetic events."
+  value       = var.vault_sync_event_url
+}
