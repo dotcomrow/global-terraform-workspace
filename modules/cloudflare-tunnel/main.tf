@@ -106,13 +106,13 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
     command = <<-EOT
       set -eu
 
-      : "${VAULT_SYNC_EVENT_URL:=}"
-      : "${VAULT_SYNC_EVENT_TOKEN:=}"
-      : "${VAULT_SYNC_SERVICE_NAME:=}"
-      : "${VAULT_SYNC_SERVICE_REGION:=}"
-      : "${VAULT_SYNC_EVENT_URL_SECRET_NAME:=vault-sync-event-url}"
-      : "${VAULT_SYNC_EVENT_TOKEN_SECRET_NAME:=vault-sync-event-token}"
-      : "${VAULT_SYNC_EVENT_FALLBACK_SYNC_ALL:=false}"
+      : "$${VAULT_SYNC_EVENT_URL:=}"
+      : "$${VAULT_SYNC_EVENT_TOKEN:=}"
+      : "$${VAULT_SYNC_SERVICE_NAME:=}"
+      : "$${VAULT_SYNC_SERVICE_REGION:=}"
+      : "$${VAULT_SYNC_EVENT_URL_SECRET_NAME:=vault-sync-event-url}"
+      : "$${VAULT_SYNC_EVENT_TOKEN_SECRET_NAME:=vault-sync-event-token}"
+      : "$${VAULT_SYNC_EVENT_FALLBACK_SYNC_ALL:=false}"
 
       trim() {
         printf '%s' "$${1}" | tr -d '\r\n' | sed 's/^\\s*//;s/\\s*$//'
