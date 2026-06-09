@@ -106,42 +106,12 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
     command = <<-EOT
       set -eu
 
-audit_event="$(cat <<JSON
-{
-  "protoPayload": {
-    "methodName": "google.cloud.secretmanager.v1.SecretManagerService.AddSecretVersion",
-    "resourceName": "${google_secret_manager_secret_version.tunnel_token[0].name}",
-    "serviceName": "secretmanager.googleapis.com"
-  }
-}
-JSON
-)"
-
-audit_event_b64="$(printf '%s' "$${audit_event}" | base64 | tr -d '\n')"
-
 payload="$(cat <<JSON
 {
-  "message": {
-    "messageId": "${google_secret_manager_secret_version.tunnel_token[0].id}",
-    "publishTime": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-    "data": "$${audit_event_b64}",
-    "attributes": {
-      "source": "terraform-cloudflare-tunnel",
-      "eventType": "google.cloud.secretmanager.v1.SecretManagerService.AddSecretVersion",
-      "project": "${var.project_id}"
-    }
-  },
   "protoPayload": {
     "methodName": "google.cloud.secretmanager.v1.SecretManagerService.AddSecretVersion",
     "resourceName": "${google_secret_manager_secret_version.tunnel_token[0].name}",
     "serviceName": "secretmanager.googleapis.com"
-  },
-  "data": {
-    "protoPayload": {
-      "methodName": "google.cloud.secretmanager.v1.SecretManagerService.AddSecretVersion",
-      "resourceName": "${google_secret_manager_secret_version.tunnel_token[0].name}",
-      "serviceName": "secretmanager.googleapis.com"
-    }
   }
 }
 JSON

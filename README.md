@@ -132,7 +132,7 @@ If you want tunnel secret creation to be picked up by the existing Vault sync pi
 emit_tunnel_secret_sync_events = true
 vault_sync_event_url          = "https://vault-sync-run-container-<hash>-<ns>.run.app"
 vault_sync_event_token        = "optional_bearer_token"
-vault_sync_event_fallback_sync_all = false
+vault_sync_event_fallback_sync_all = true
 
 # Optional: if true and the direct synthetic payload post fails, run POST /sync-all
 # to force a full resync from vault-sync's side.
@@ -142,7 +142,7 @@ Important:
 
 - `vault_sync_event_url` is required for each run to enable emission. Without it, no event publication runs.
 - For protected Cloud Run endpoints, set `vault_sync_event_token` to a short-lived **identity token** (for example `gcloud auth print-identity-token`) that can invoke the `vault-sync` service.
-- The synthetic event call is now strict: only HTTP `200` is treated as success. `204` is treated as a warning that the event was accepted but ignored.
+- The synthetic event call treats `200` as success and triggers `/sync-all` fallback on any non-`200` response (including `204`), unless you explicitly set `vault_sync_event_fallback_sync_all = false`.
 
 Setting just `vault_sync_event_url` to a non-empty value is enough to enable emission, but you must include a valid bearer token for most protected endpoints.
 

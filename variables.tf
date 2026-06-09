@@ -44,7 +44,7 @@ variable "vault_sync_event_token" {
 variable "vault_sync_event_fallback_sync_all" {
   description = "Also call /sync-all after synthetic event emit, for reconciliation when per-secret events are not processed."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "cloudflare_token" {

@@ -107,5 +107,5 @@ variable "vault_sync_event_token" {
 variable "vault_sync_event_fallback_sync_all" {
   description = "When true, call /sync-all after synthetic event emit."
   type        = bool
-  default     = false
+  default     = true
 }
