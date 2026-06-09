@@ -106,17 +106,17 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
 JSON
 )"
 
-      if [ -n "${VAULT_SYNC_EVENT_TOKEN}" ]; then
+      if [ -n "$${VAULT_SYNC_EVENT_TOKEN}" ]; then
         curl --fail --show-error --location --request POST \
           --header "Content-Type: application/json" \
-          --header "Authorization: Bearer ${VAULT_SYNC_EVENT_TOKEN}" \
-          --data "${payload}" \
-          "${VAULT_SYNC_EVENT_URL}"
+          --header "Authorization: Bearer $${VAULT_SYNC_EVENT_TOKEN}" \
+          --data "$${payload}" \
+          "$${VAULT_SYNC_EVENT_URL}"
       else
         curl --fail --show-error --location --request POST \
           --header "Content-Type: application/json" \
-          --data "${payload}" \
-          "${VAULT_SYNC_EVENT_URL}"
+          --data "$${payload}" \
+          "$${VAULT_SYNC_EVENT_URL}"
       fi
     EOT
   }
