@@ -270,7 +270,7 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
         rm -f "$${response_file}"
         exit 1
       fi
-      echo "vault sync event target=$${event_url} source=$${event_url_source:-unknown} token_source=${token_source:-env-or-secret}"
+      echo "vault sync event target=$${event_url} source=$${event_url_source:-unknown} token_source=$${token_source:-env-or-secret}"
 
       sync_all_url="$${event_url}/sync-all"
 
