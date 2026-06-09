@@ -83,6 +83,13 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
 
   depends_on = [google_secret_manager_secret_version.tunnel_token]
 
+  lifecycle {
+    precondition {
+      condition     = !(var.emit_tunnel_secret_sync_events && trimspace(var.vault_sync_event_url) == "")
+      error_message = "vault_sync_event_url must be set when emit_tunnel_secret_sync_events = true."
+    }
+  }
+
   triggers = {
     version_id = google_secret_manager_secret_version.tunnel_token[0].id
     event_url  = local.vault_sync_event_url

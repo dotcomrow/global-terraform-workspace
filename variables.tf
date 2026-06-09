@@ -21,11 +21,6 @@ variable "emit_tunnel_secret_sync_events" {
   type        = bool
   default     = false
   nullable    = false
-
-  validation {
-    condition     = !var.emit_tunnel_secret_sync_events || trimspace(var.vault_sync_event_url) != ""
-    error_message = "vault_sync_event_url must be set when emit_tunnel_secret_sync_events is true."
-  }
 }
 
 variable "vault_sync_event_url" {
