@@ -95,8 +95,6 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
     environment = merge(
       {
         GCP_PROJECT_ID                      = var.project_id
-        VAULT_SYNC_EVENT_URL                = local.vault_sync_event_url
-        VAULT_SYNC_EVENT_TOKEN              = var.vault_sync_event_token
         VAULT_SYNC_EVENT_FALLBACK_SYNC_ALL   = var.vault_sync_event_fallback_sync_all ? "true" : "false"
       },
       local.vault_sync_event_url_env,
@@ -118,7 +116,7 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
         printf '%s' "$${1}" | tr -d '\r\n' | sed 's/^\\s*//;s/\\s*$//'
       }
 
-      vault_sync_service_name="$${VAULT_SYNC_SERVICE_NAME:-vault-sync-run-container}"
+      vault_sync_service_name="$${VAULT_SYNC_SERVICE_NAME:-}"
       vault_sync_service_region="$${VAULT_SYNC_SERVICE_REGION:-}"
       vault_sync_event_url_secret_name="$${VAULT_SYNC_EVENT_URL_SECRET_NAME:-vault-sync-event-url}"
       vault_sync_event_token_secret_name="$${VAULT_SYNC_EVENT_TOKEN_SECRET_NAME:-vault-sync-event-token}"
@@ -158,6 +156,12 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
 
         if [ -n "$${audience}" ] && command -v gcloud >/dev/null 2>&1; then
           discovered="$$(gcloud auth print-identity-token --audiences "$${audience}" 2>/dev/null || true)"
+        fi
+
+        if [ -z "$${discovered}" ] && [ -n "$${audience}" ] && command -v curl >/dev/null 2>&1; then
+          discovered="$$(curl -sS --fail --show-error \
+            -H 'Metadata-Flavor: Google' \
+            "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/identity?audience=$${audience}" 2>/dev/null || true)"
         fi
 
         if [ -z "$${discovered}" ] && [ -n "$${project}" ] && [ -n "$${token_secret_name}" ] && command -v gcloud >/dev/null 2>&1; then
@@ -236,16 +240,29 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
       echo "Posting synthetic vault-sync event for secret version: ${google_secret_manager_secret_version.tunnel_token[0].name}"
 
       response_file="$$(mktemp)"
-      event_url="$$(trim "$${VAULT_SYNC_EVENT_URL}")"
+      event_url=""
+      event_url_source="unset"
+      token_source="unset"
+
+      if [ -n "$${VAULT_SYNC_EVENT_URL}" ]; then
+        event_url="$$(trim "$${VAULT_SYNC_EVENT_URL}")"
+        event_url_source="process-env"
+      fi
 
       if [ -z "$${event_url}" ] && [ -n "$${GCP_PROJECT_ID}" ] && command -v gcloud >/dev/null 2>&1; then
         event_url="$$(discover_event_url "$${GCP_PROJECT_ID}" "$${vault_sync_service_region}" "$${vault_sync_service_name}" "$${vault_sync_event_url_secret_name}")"
+        event_url_source="gcloud"
       fi
 
       event_url="$$(trim "$${event_url}")"
       event_url="$${event_url%/}"
       if [ -n "$${event_url}" ] && [ -z "$${VAULT_SYNC_EVENT_TOKEN}" ] && command -v gcloud >/dev/null 2>&1; then
         VAULT_SYNC_EVENT_TOKEN="$$(discover_event_token "$${GCP_PROJECT_ID}" "$${event_url}")"
+        token_source="gcloud"
+      elif [ -n "$${VAULT_SYNC_EVENT_TOKEN}" ]; then
+        token_source="process-env"
+      else
+        token_source="missing"
       fi
 
       if [ -z "$${event_url}" ]; then
@@ -253,6 +270,7 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
         rm -f "$${response_file}"
         exit 1
       fi
+      echo "vault sync event target=$${event_url} source=$${event_url_source:-unknown} token_source=${token_source:-env-or-secret}"
 
       sync_all_url="$${event_url}/sync-all"
 
@@ -280,7 +298,7 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
         echo "vault sync event response body: <empty>"
       fi
 
-      if [ "$${status}" -ne 200 ]; then
+      if [ "$${status}" -ne 200 ] && [ "$${status}" -ne 204 ]; then
         echo "vault sync event failed with status $${status}" >&2
         if [ "$${VAULT_SYNC_EVENT_FALLBACK_SYNC_ALL}" = "true" ]; then
           echo "Attempting fallback sync-all to recover..."
