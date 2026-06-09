@@ -132,6 +132,10 @@ If you want tunnel secret creation to be picked up by the existing Vault sync pi
 emit_tunnel_secret_sync_events = true
 vault_sync_event_url          = "https://vault-sync-run-container-<hash>-<ns>.run.app"
 vault_sync_event_token        = "optional_bearer_token"
+vault_sync_event_fallback_sync_all = false
+
+# Optional: if true and the direct synthetic payload post fails, run POST /sync-all
+# to force a full resync from vault-sync's side.
 ```
 
 Setting just `vault_sync_event_url` to a non-empty value is also enough to enable emission.

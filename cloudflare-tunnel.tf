@@ -28,4 +28,5 @@ module "cloudflare_tunnel" {
   emit_tunnel_secret_sync_events = var.emit_tunnel_secret_sync_events
   vault_sync_event_url           = var.vault_sync_event_url
   vault_sync_event_token         = var.vault_sync_event_token
+  vault_sync_event_fallback_sync_all = var.vault_sync_event_fallback_sync_all
 }

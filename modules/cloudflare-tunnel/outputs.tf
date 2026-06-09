@@ -54,6 +54,11 @@ output "vault_sync_event_enabled" {
   value       = var.create_gcp_secret && (var.emit_tunnel_secret_sync_events || trimspace(var.vault_sync_event_url) != "")
 }
 
+output "vault_sync_event_fallback_sync_all" {
+  description = "Whether this module instance will fall back to /sync-all on event post failure."
+  value       = var.vault_sync_event_fallback_sync_all
+}
+
 output "vault_sync_event_url" {
   description = "Vault-sync webhook URL used for synthetic events."
   value       = var.vault_sync_event_url

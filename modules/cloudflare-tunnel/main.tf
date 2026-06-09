@@ -14,6 +14,7 @@ locals {
   gcp_secret_name_slug    = join("-", regexall("[a-z0-9_-]+", lower(trimspace(var.name))))
   gcp_secret_name         = local.gcp_secret_name_input != "" ? local.gcp_secret_name_input : format("cloudflare-tunnel-%s-token", local.gcp_secret_name_slug)
   vault_sync_event_url    = trimspace(var.vault_sync_event_url)
+  vault_sync_event_fallback_sync_all = var.vault_sync_event_fallback_sync_all
   emit_tunnel_secret_events = var.emit_tunnel_secret_sync_events || local.vault_sync_event_url != ""
 }
 
@@ -99,16 +100,23 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
     environment = {
       VAULT_SYNC_EVENT_URL   = local.vault_sync_event_url
       VAULT_SYNC_EVENT_TOKEN = var.vault_sync_event_token
+      VAULT_SYNC_EVENT_FALLBACK_SYNC_ALL = var.vault_sync_event_fallback_sync_all ? "true" : "false"
     }
 
     command = <<-EOT
       set -eu
 
-      payload="$(cat <<'JSON'
+payload="$(cat <<'JSON'
 {
   "protoPayload": {
     "methodName": "google.cloud.secretmanager.v1.SecretManagerService.AddSecretVersion",
     "resourceName": "${google_secret_manager_secret_version.tunnel_token[0].name}"
+  },
+  "data": {
+    "protoPayload": {
+      "methodName": "google.cloud.secretmanager.v1.SecretManagerService.AddSecretVersion",
+      "resourceName": "${google_secret_manager_secret_version.tunnel_token[0].name}"
+    }
   }
 }
 JSON
@@ -118,21 +126,24 @@ JSON
 
       response_file="$$(mktemp)"
 
+      event_url="$${VAULT_SYNC_EVENT_URL%/}"
+      sync_all_url="$${event_url}/sync-all"
+
       if [ -n "$${VAULT_SYNC_EVENT_TOKEN}" ]; then
         status="$$(curl --silent --show-error --location --request POST \
-          --header "Content-Type: application/json" \
+          --header 'Content-Type: application/json' \
           --header "Authorization: Bearer $${VAULT_SYNC_EVENT_TOKEN}" \
           --data "$${payload}" \
           --write-out '%%{http_code}' \
           --output "$${response_file}" \
-          "$${VAULT_SYNC_EVENT_URL}" || echo 000)"
+          "$${event_url}" || echo 000)"
       else
         status="$$(curl --silent --show-error --location --request POST \
-          --header "Content-Type: application/json" \
+          --header 'Content-Type: application/json' \
           --data "$${payload}" \
           --write-out '%%{http_code}' \
           --output "$${response_file}" \
-          "$${VAULT_SYNC_EVENT_URL}" || echo 000)"
+          "$${event_url}" || echo 000)"
       fi
 
       echo "vault sync event response status=$${status}"
@@ -144,6 +155,36 @@ JSON
 
       if [ "$${status}" -ne 200 ] && [ "$${status}" -ne 204 ]; then
         echo "vault sync event failed with status $${status}" >&2
+
+        if [ "$${VAULT_SYNC_EVENT_FALLBACK_SYNC_ALL}" = "true" ]; then
+          echo "Attempting fallback sync-all to recover..."
+
+          if [ -n "$${VAULT_SYNC_EVENT_TOKEN}" ]; then
+            sync_all_status="$$(curl --silent --show-error --location --request POST \
+              --header 'Content-Type: application/json' \
+              --header "Authorization: Bearer $${VAULT_SYNC_EVENT_TOKEN}" \
+              --write-out '%%{http_code}' \
+              --output "$${response_file}" \
+              "$${sync_all_url}" || echo 000)"
+          else
+            sync_all_status="$$(curl --silent --show-error --location --request POST \
+              --header 'Content-Type: application/json' \
+              --write-out '%%{http_code}' \
+              --output "$${response_file}" \
+              "$${sync_all_url}" || echo 000)"
+          fi
+
+          echo "vault sync fallback status=$${sync_all_status}"
+          if [ "$${sync_all_status}" -ne 200 ] && [ "$${sync_all_status}" -ne 204 ]; then
+            echo "vault sync fallback failed with status $${sync_all_status}" >&2
+            rm -f "$${response_file}"
+            exit 1
+          fi
+          echo "vault sync fallback completed."
+          rm -f "$${response_file}"
+          exit 0
+        fi
+
         rm -f "$${response_file}"
         exit 1
       fi

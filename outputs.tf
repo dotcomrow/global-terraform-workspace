@@ -79,6 +79,11 @@ output "cloudflare_tunnel_vault_sync_event_enabled" {
   }
 }
 
+output "vault_sync_event_fallback_sync_all" {
+  description = "Whether fallback /sync-all behavior is enabled."
+  value       = var.vault_sync_event_fallback_sync_all
+}
+
 output "cloudflare_tunnel_secret_enabled" {
   description = "Whether Google Secret Manager creation is enabled per tunnel key."
   value = {
