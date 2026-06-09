@@ -106,16 +106,41 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
     command = <<-EOT
       set -eu
 
-payload="$(cat <<JSON
-{
-  "protoPayload": {
-    "methodName": "google.cloud.secretmanager.v1.SecretManagerService.AddSecretVersion",
-    "resourceName": "${google_secret_manager_secret_version.tunnel_token[0].name}",
-    "serviceName": "secretmanager.googleapis.com"
-  }
-}
-JSON
-)"
+      audit_payload="$(cat <<JSON
+      {
+        "protoPayload": {
+          "methodName": "google.cloud.secretmanager.v1.SecretManagerService.AddSecretVersion",
+          "resourceName": "${google_secret_manager_secret_version.tunnel_token[0].name}",
+          "serviceName": "secretmanager.googleapis.com"
+        }
+      }
+      JSON
+      )"
+
+      audit_payload_b64="$(printf '%s' "$${audit_payload}" | base64 | tr -d '\n')"
+
+      payload="$(cat <<JSON
+      {
+        "message": {
+          "messageId": "${google_secret_manager_secret_version.tunnel_token[0].id}",
+          "publishTime": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+          "data": "$${audit_payload_b64}"
+        },
+        "data": {
+          "protoPayload": {
+            "methodName": "google.cloud.secretmanager.v1.SecretManagerService.AddSecretVersion",
+            "resourceName": "${google_secret_manager_secret_version.tunnel_token[0].name}",
+            "serviceName": "secretmanager.googleapis.com"
+          }
+        },
+        "protoPayload": {
+          "methodName": "google.cloud.secretmanager.v1.SecretManagerService.AddSecretVersion",
+          "resourceName": "${google_secret_manager_secret_version.tunnel_token[0].name}",
+          "serviceName": "secretmanager.googleapis.com"
+        }
+      }
+      JSON
+      )"
 
       echo "Posting synthetic vault-sync event for secret version: ${google_secret_manager_secret_version.tunnel_token[0].name}"
 
