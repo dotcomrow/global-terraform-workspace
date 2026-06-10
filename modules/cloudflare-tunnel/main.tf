@@ -13,7 +13,7 @@ locals {
   gcp_secret_name_input   = trimspace(var.gcp_secret_id)
   gcp_secret_name_slug    = join("-", regexall("[a-z0-9_-]+", lower(trimspace(var.name))))
   gcp_secret_name         = local.gcp_secret_name_input != "" ? local.gcp_secret_name_input : format("cloudflare-tunnel-%s-token", local.gcp_secret_name_slug)
-  vault_sync_service_name  = trimspace(var.vault_sync_service_name)
+  vault_sync_service_name  = trimspace(var.vault_sync_service_name) != "" ? trimspace(var.vault_sync_service_name) : "vault-sync-run-container"
   vault_sync_service_region = trimspace(var.vault_sync_service_region)
   vault_sync_event_url_secret_name = trimspace(var.vault_sync_event_url_secret_name)
   vault_sync_event_token_secret_name = trimspace(var.vault_sync_event_token_secret_name)
@@ -100,10 +100,11 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
   }
 
   provisioner "local-exec" {
-    environment = merge(
+      environment = merge(
       {
         GCP_PROJECT_ID                      = var.project_id
         VAULT_SYNC_EVENT_FALLBACK_SYNC_ALL   = var.vault_sync_event_fallback_sync_all ? "true" : "false"
+        GOOGLE_CREDENTIALS_JSON              = var.google_credentials_json
       },
       local.vault_sync_event_url_env,
       local.vault_sync_event_token_env,
@@ -127,6 +128,22 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
       trim() {
         printf '%s' "$${1}" | tr -d '\r\n' | sed 's/^\\s*//;s/\\s*$//'
       }
+
+      GCP_CRED_FILE=""
+      cleanup_gcp_credentials() {
+        if [ -n "$${GCP_CRED_FILE}" ] && [ -f "$${GCP_CRED_FILE}" ]; then
+          rm -f "$${GCP_CRED_FILE}"
+        fi
+      }
+      trap cleanup_gcp_credentials EXIT INT TERM
+
+      if [ -n "$${GOOGLE_CREDENTIALS_JSON}" ] && command -v gcloud >/dev/null 2>&1; then
+        GCP_CRED_FILE="$(mktemp)"
+        printf '%s' "$${GOOGLE_CREDENTIALS_JSON}" > "$${GCP_CRED_FILE}"
+        gcloud auth activate-service-account --key-file="$${GCP_CRED_FILE}" >/tmp/gcloud-auth.log || true
+        gcloud config set project "$${GCP_PROJECT_ID}" >/tmp/gcloud-config.log || true
+        export GOOGLE_APPLICATION_CREDENTIALS="$${GCP_CRED_FILE}"
+      fi
 
       vault_sync_service_name="$${VAULT_SYNC_SERVICE_NAME:-}"
       vault_sync_service_region="$${VAULT_SYNC_SERVICE_REGION:-}"

@@ -86,6 +86,13 @@ variable "emit_tunnel_secret_sync_events" {
   default     = false
 }
 
+variable "google_credentials_json" {
+  description = "Optional Google service account JSON for local-exec auth during vault-sync event discovery."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 variable "vault_sync_event_url" {
   description = "Optional webhook URL for synthetic Vault sync events."
   type        = string

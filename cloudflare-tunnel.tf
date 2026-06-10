@@ -25,12 +25,13 @@ module "cloudflare_tunnel" {
   create_gcp_secret = each.value.create_gcp_secret
   gcp_secret_id     = each.value.gcp_secret_id
   proxied         = each.value.proxied
-  emit_tunnel_secret_sync_events = var.emit_tunnel_secret_sync_events
-  vault_sync_event_url           = var.vault_sync_event_url
-  vault_sync_event_token         = var.vault_sync_event_token
-  vault_sync_service_name        = var.vault_sync_service_name
-  vault_sync_service_region      = var.vault_sync_service_region != "" ? var.vault_sync_service_region : var.region
-  vault_sync_event_url_secret_name = var.vault_sync_event_url_secret_name
-  vault_sync_event_token_secret_name = var.vault_sync_event_token_secret_name
-  vault_sync_event_fallback_sync_all = var.vault_sync_event_fallback_sync_all
+      emit_tunnel_secret_sync_events = var.emit_tunnel_secret_sync_events
+      vault_sync_event_url           = var.vault_sync_event_url
+      vault_sync_event_token         = var.vault_sync_event_token
+      google_credentials_json         = var.google_credentials_tunnel_key_json
+      vault_sync_service_name        = var.vault_sync_service_name
+      vault_sync_service_region      = var.vault_sync_service_region
+      vault_sync_event_url_secret_name = var.vault_sync_event_url_secret_name
+      vault_sync_event_token_secret_name = var.vault_sync_event_token_secret_name
+      vault_sync_event_fallback_sync_all = var.vault_sync_event_fallback_sync_all
 }
