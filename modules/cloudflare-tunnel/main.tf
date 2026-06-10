@@ -145,14 +145,20 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
       }
 
       GCP_CRED_FILE=""
+      CLOUDSDK_CONFIG_DIR=""
       cleanup_gcp_credentials() {
         if [ -n "$${GCP_CRED_FILE}" ] && [ -f "$${GCP_CRED_FILE}" ]; then
           rm -f "$${GCP_CRED_FILE}"
+        fi
+        if [ -n "$${CLOUDSDK_CONFIG_DIR}" ] && [ -d "$${CLOUDSDK_CONFIG_DIR}" ]; then
+          rm -rf "$${CLOUDSDK_CONFIG_DIR}"
         fi
       }
       trap cleanup_gcp_credentials EXIT INT TERM
 
       if [ -n "$${GOOGLE_CREDENTIALS_JSON}" ] && command -v gcloud >/dev/null 2>&1; then
+        CLOUDSDK_CONFIG_DIR="$(mktemp -d)"
+        export CLOUDSDK_CONFIG="$${CLOUDSDK_CONFIG_DIR}"
         GCP_CRED_FILE="$(mktemp)"
         printf '%s' "$${GOOGLE_CREDENTIALS_JSON}" > "$${GCP_CRED_FILE}"
         gcloud auth activate-service-account --key-file="$${GCP_CRED_FILE}" >/tmp/gcloud-auth.log || true
