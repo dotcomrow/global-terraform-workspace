@@ -123,6 +123,12 @@ variable "vault_sync_service_name" {
   default     = "vault-sync-run-container"
 }
 
+variable "vault_sync_service_project" {
+  description = "Optional GCP project that hosts the vault-sync Cloud Run service used for synthetic event emission."
+  type        = string
+  default     = ""
+}
+
 variable "vault_sync_service_region" {
   description = "Optional region for the vault-sync Cloud Run service. If unset, auto-discovery searches all regions."
   type        = string

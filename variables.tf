@@ -47,6 +47,12 @@ variable "vault_sync_service_name" {
   default     = ""
 }
 
+variable "vault_sync_service_project" {
+  description = "Optional GCP project that hosts the vault-sync Cloud Run service used for synthetic events."
+  type        = string
+  default     = ""
+}
+
 variable "vault_sync_service_region" {
   description = "Cloud Run region for vault-sync service discovery. If unset, discovery searches all managed regions."
   type        = string

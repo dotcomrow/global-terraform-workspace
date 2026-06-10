@@ -15,6 +15,7 @@ locals {
   gcp_secret_name         = local.gcp_secret_name_input != "" ? local.gcp_secret_name_input : format("cloudflare-tunnel-%s-token", local.gcp_secret_name_slug)
   vault_sync_service_name  = trimspace(var.vault_sync_service_name) != "" ? trimspace(var.vault_sync_service_name) : "vault-sync-run-container"
   vault_sync_service_region = trimspace(var.vault_sync_service_region)
+  vault_sync_service_project = trimspace(var.vault_sync_service_project) != "" ? trimspace(var.vault_sync_service_project) : var.project_id
   vault_sync_event_url_secret_name = trimspace(var.vault_sync_event_url_secret_name)
   vault_sync_event_token_secret_name = trimspace(var.vault_sync_event_token_secret_name)
   vault_sync_event_url    = trimspace(var.vault_sync_event_url)
@@ -23,9 +24,20 @@ locals {
   vault_sync_event_token_env = var.vault_sync_event_token != "" ? { VAULT_SYNC_EVENT_TOKEN = var.vault_sync_event_token } : {}
   vault_sync_service_name_env = local.vault_sync_service_name != "" ? { VAULT_SYNC_SERVICE_NAME = local.vault_sync_service_name } : {}
   vault_sync_service_region_env = local.vault_sync_service_region != "" ? { VAULT_SYNC_SERVICE_REGION = local.vault_sync_service_region } : {}
+  vault_sync_service_project_env = local.vault_sync_service_project != "" ? { VAULT_SYNC_SERVICE_PROJECT_ID = local.vault_sync_service_project } : {}
   vault_sync_event_url_secret_name_env = local.vault_sync_event_url_secret_name != "" ? { VAULT_SYNC_EVENT_URL_SECRET_NAME = local.vault_sync_event_url_secret_name } : {}
   vault_sync_event_token_secret_name_env = local.vault_sync_event_token_secret_name != "" ? { VAULT_SYNC_EVENT_TOKEN_SECRET_NAME = local.vault_sync_event_token_secret_name } : {}
   emit_tunnel_secret_events = var.emit_tunnel_secret_sync_events
+  workspace_service_account_email = trimspace(try(jsondecode(var.google_credentials_json).client_email, ""))
+}
+
+resource "google_cloud_run_service_iam_member" "vault_sync_invoker" {
+  count    = local.emit_tunnel_secret_events && local.workspace_service_account_email != "" && local.vault_sync_service_name != "" && local.vault_sync_service_region != "" ? 1 : 0
+  project  = local.vault_sync_service_project
+  location = local.vault_sync_service_region
+  service  = local.vault_sync_service_name
+  role     = "roles/run.invoker"
+  member   = "serviceAccount:${local.workspace_service_account_email}"
 }
 
 resource "random_bytes" "tunnel_secret" {
@@ -100,6 +112,7 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
   }
 
   provisioner "local-exec" {
+      interpreter = ["/bin/bash", "-c"]
       environment = merge(
       {
         GCP_PROJECT_ID                      = var.project_id
@@ -110,6 +123,7 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
       local.vault_sync_event_token_env,
       local.vault_sync_service_name_env,
       local.vault_sync_service_region_env,
+      local.vault_sync_service_project_env,
       local.vault_sync_event_url_secret_name_env,
       local.vault_sync_event_token_secret_name_env,
     )
@@ -121,6 +135,7 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
       : "$${VAULT_SYNC_EVENT_TOKEN:=}"
       : "$${VAULT_SYNC_SERVICE_NAME:=}"
       : "$${VAULT_SYNC_SERVICE_REGION:=}"
+      : "$${VAULT_SYNC_SERVICE_PROJECT_ID:=$${GCP_PROJECT_ID}}"
       : "$${VAULT_SYNC_EVENT_URL_SECRET_NAME:=vault-sync-event-url}"
       : "$${VAULT_SYNC_EVENT_TOKEN_SECRET_NAME:=vault-sync-event-token}"
       : "$${VAULT_SYNC_EVENT_FALLBACK_SYNC_ALL:=false}"
@@ -147,6 +162,7 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
 
       vault_sync_service_name="$${VAULT_SYNC_SERVICE_NAME:-}"
       vault_sync_service_region="$${VAULT_SYNC_SERVICE_REGION:-}"
+      vault_sync_service_project="$${VAULT_SYNC_SERVICE_PROJECT_ID:-$${GCP_PROJECT_ID}}"
       vault_sync_event_url_secret_name="$${VAULT_SYNC_EVENT_URL_SECRET_NAME:-vault-sync-event-url}"
       vault_sync_event_token_secret_name="$${VAULT_SYNC_EVENT_TOKEN_SECRET_NAME:-vault-sync-event-token}"
 
@@ -278,15 +294,15 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
         event_url_source="process-env"
       fi
 
-      if [ -z "$${event_url}" ] && [ -n "$${GCP_PROJECT_ID}" ] && command -v gcloud >/dev/null 2>&1; then
-        event_url="$$(discover_event_url "$${GCP_PROJECT_ID}" "$${vault_sync_service_region}" "$${vault_sync_service_name}" "$${vault_sync_event_url_secret_name}")"
+      if [ -z "$${event_url}" ] && [ -n "$${vault_sync_service_project}" ] && command -v gcloud >/dev/null 2>&1; then
+        event_url="$$(discover_event_url "$${vault_sync_service_project}" "$${vault_sync_service_region}" "$${vault_sync_service_name}" "$${vault_sync_event_url_secret_name}")"
         event_url_source="gcloud"
       fi
 
       event_url="$$(trim "$${event_url}")"
       event_url="$${event_url%/}"
       if [ -n "$${event_url}" ] && [ -z "$${VAULT_SYNC_EVENT_TOKEN}" ] && command -v gcloud >/dev/null 2>&1; then
-        VAULT_SYNC_EVENT_TOKEN="$$(discover_event_token "$${GCP_PROJECT_ID}" "$${event_url}")"
+        VAULT_SYNC_EVENT_TOKEN="$$(discover_event_token "$${vault_sync_service_project}" "$${event_url}")"
         token_source="gcloud"
       elif [ -n "$${VAULT_SYNC_EVENT_TOKEN}" ]; then
         token_source="process-env"
