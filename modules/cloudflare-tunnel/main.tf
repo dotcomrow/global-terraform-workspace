@@ -13,10 +13,18 @@ locals {
   gcp_secret_name_input   = trimspace(var.gcp_secret_id)
   gcp_secret_name_slug    = join("-", regexall("[a-z0-9_-]+", lower(trimspace(var.name))))
   gcp_secret_name         = local.gcp_secret_name_input != "" ? local.gcp_secret_name_input : format("cloudflare-tunnel-%s-token", local.gcp_secret_name_slug)
+  vault_sync_service_name  = trimspace(var.vault_sync_service_name)
+  vault_sync_service_region = trimspace(var.vault_sync_service_region)
+  vault_sync_event_url_secret_name = trimspace(var.vault_sync_event_url_secret_name)
+  vault_sync_event_token_secret_name = trimspace(var.vault_sync_event_token_secret_name)
   vault_sync_event_url    = trimspace(var.vault_sync_event_url)
   vault_sync_event_fallback_sync_all = var.vault_sync_event_fallback_sync_all
   vault_sync_event_url_env  = local.vault_sync_event_url != "" ? { VAULT_SYNC_EVENT_URL = local.vault_sync_event_url } : {}
   vault_sync_event_token_env = var.vault_sync_event_token != "" ? { VAULT_SYNC_EVENT_TOKEN = var.vault_sync_event_token } : {}
+  vault_sync_service_name_env = local.vault_sync_service_name != "" ? { VAULT_SYNC_SERVICE_NAME = local.vault_sync_service_name } : {}
+  vault_sync_service_region_env = local.vault_sync_service_region != "" ? { VAULT_SYNC_SERVICE_REGION = local.vault_sync_service_region } : {}
+  vault_sync_event_url_secret_name_env = local.vault_sync_event_url_secret_name != "" ? { VAULT_SYNC_EVENT_URL_SECRET_NAME = local.vault_sync_event_url_secret_name } : {}
+  vault_sync_event_token_secret_name_env = local.vault_sync_event_token_secret_name != "" ? { VAULT_SYNC_EVENT_TOKEN_SECRET_NAME = local.vault_sync_event_token_secret_name } : {}
   emit_tunnel_secret_events = var.emit_tunnel_secret_sync_events
 }
 
@@ -99,6 +107,10 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
       },
       local.vault_sync_event_url_env,
       local.vault_sync_event_token_env,
+      local.vault_sync_service_name_env,
+      local.vault_sync_service_region_env,
+      local.vault_sync_event_url_secret_name_env,
+      local.vault_sync_event_token_secret_name_env,
     )
 
     command = <<-EOT

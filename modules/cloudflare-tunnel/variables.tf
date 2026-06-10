@@ -109,3 +109,27 @@ variable "vault_sync_event_fallback_sync_all" {
   type        = bool
   default     = true
 }
+
+variable "vault_sync_service_name" {
+  description = "Optional Cloud Run service name used to auto-discover the vault-sync webhook URL."
+  type        = string
+  default     = "vault-sync-run-container"
+}
+
+variable "vault_sync_service_region" {
+  description = "Optional region for the vault-sync Cloud Run service. If unset, auto-discovery searches all regions."
+  type        = string
+  default     = ""
+}
+
+variable "vault_sync_event_url_secret_name" {
+  description = "Optional Secret Manager secret name that stores the vault-sync webhook URL."
+  type        = string
+  default     = "vault-sync-event-url"
+}
+
+variable "vault_sync_event_token_secret_name" {
+  description = "Optional Secret Manager secret name that stores the vault-sync bearer token."
+  type        = string
+  default     = "vault-sync-event-token"
+}

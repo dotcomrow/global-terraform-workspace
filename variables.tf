@@ -41,6 +41,30 @@ variable "vault_sync_event_token" {
   default     = ""
 }
 
+variable "vault_sync_service_name" {
+  description = "Cloud Run service name to auto-discover the vault-sync webhook URL."
+  type        = string
+  default     = ""
+}
+
+variable "vault_sync_service_region" {
+  description = "Cloud Run region for vault-sync service discovery. If unset, discovery searches all managed regions."
+  type        = string
+  default     = ""
+}
+
+variable "vault_sync_event_url_secret_name" {
+  description = "Secret Manager secret name for vault-sync webhook URL."
+  type        = string
+  default     = "vault-sync-event-url"
+}
+
+variable "vault_sync_event_token_secret_name" {
+  description = "Secret Manager secret name for vault-sync bearer token."
+  type        = string
+  default     = "vault-sync-event-token"
+}
+
 variable "vault_sync_event_fallback_sync_all" {
   description = "Also call /sync-all after synthetic event emit, for reconciliation when per-secret events are not processed."
   type        = bool

@@ -130,8 +130,15 @@ If you want tunnel secret creation to be picked up by the existing Vault sync pi
 
 ```hcl
 emit_tunnel_secret_sync_events = true
-vault_sync_event_url          = "https://vault-sync-run-container-<hash>-<ns>.run.app"
-vault_sync_event_token        = "optional_bearer_token"
+# Optional: either set directly or let the module discover it from the platform
+# vault_sync_event_url          = "https://vault-sync-run-container-<hash>-<ns>.run.app"
+# vault_sync_event_token        = "optional_bearer_token"
+
+# Optional discovery inputs (if vault_sync_event_url is omitted)
+vault_sync_service_name       = "vault-sync-run-container"
+vault_sync_service_region     = "us-east4" # optional
+# vault_sync_event_url_secret_name = "vault-sync-event-url"
+# vault_sync_event_token_secret_name = "vault-sync-event-token"
 vault_sync_event_fallback_sync_all = true
 
 # Optional: if true and the direct synthetic payload post fails, run POST /sync-all
@@ -140,11 +147,18 @@ vault_sync_event_fallback_sync_all = true
 
 Important:
 
-- `vault_sync_event_url` is required for each run to enable emission. Without it, no event publication runs.
-- For protected Cloud Run endpoints, set `vault_sync_event_token` to a short-lived **identity token** (for example `gcloud auth print-identity-token`) that can invoke the `vault-sync` service.
+- `vault_sync_event_url` can be left blank if discovery is enabled.
+- If `vault_sync_event_url` is blank, the module discovers it in order from:
+  - explicit `vault_sync_service_name` / optional `vault_sync_service_region` (via `gcloud run services describe`)
+  - Secret Manager secret `vault_sync_event_url_secret_name` (defaults to `vault-sync-event-url`)
+- For protected endpoints, set `vault_sync_event_token` directly when possible, or let discovery resolve it from:
+  - generated identity token using the detected URL audience
+  - Secret Manager secret `vault_sync_event_token_secret_name` (defaults to `vault-sync-event-token`)
 - The synthetic event call treats `200` as success and triggers `/sync-all` fallback on any non-`200` response (including `204`), unless you explicitly set `vault_sync_event_fallback_sync_all = false`.
 
-Setting just `vault_sync_event_url` to a non-empty value is enough to enable emission, but you must include a valid bearer token for most protected endpoints.
+Minimum parameters for discovery are your GCP project (already `secret_manager_project_id`) and either:
+- `vault_sync_service_name` (recommended), or
+- `vault_sync_event_url_secret_name` secret containing the webhook URL.
 
 Terraform only auto-loads `terraform.tfvars` and `*.auto.tfvars`; other filenames (such as `cloudflare-tunnels.tfvars`) are ignored unless you pass `-var-file`.
 

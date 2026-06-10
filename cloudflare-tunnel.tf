@@ -28,5 +28,9 @@ module "cloudflare_tunnel" {
   emit_tunnel_secret_sync_events = var.emit_tunnel_secret_sync_events
   vault_sync_event_url           = var.vault_sync_event_url
   vault_sync_event_token         = var.vault_sync_event_token
+  vault_sync_service_name        = var.vault_sync_service_name
+  vault_sync_service_region      = var.vault_sync_service_region != "" ? var.vault_sync_service_region : var.region
+  vault_sync_event_url_secret_name = var.vault_sync_event_url_secret_name
+  vault_sync_event_token_secret_name = var.vault_sync_event_token_secret_name
   vault_sync_event_fallback_sync_all = var.vault_sync_event_fallback_sync_all
 }
