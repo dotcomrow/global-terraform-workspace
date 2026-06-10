@@ -32,7 +32,7 @@ locals {
 }
 
 resource "google_cloud_run_service_iam_member" "vault_sync_invoker" {
-  count    = local.emit_tunnel_secret_events && local.workspace_service_account_email != "" && local.vault_sync_service_name != "" && local.vault_sync_service_region != "" ? 1 : 0
+  count    = local.emit_tunnel_secret_events && local.workspace_service_account_email != "" && local.vault_sync_service_name != "" && local.vault_sync_service_region != "" && var.vault_sync_grant_invoker_binding ? 1 : 0
   project  = local.vault_sync_service_project
   location = local.vault_sync_service_region
   service  = local.vault_sync_service_name

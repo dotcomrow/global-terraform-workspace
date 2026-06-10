@@ -140,6 +140,11 @@ vault_sync_service_region     = "us-east4" # optional
 # vault_sync_event_url_secret_name = "vault-sync-event-url"
 # vault_sync_event_token_secret_name = "vault-sync-event-token"
 vault_sync_event_fallback_sync_all = true
+# Optional (default: false):
+# vault_sync_grant_invoker_binding = false
+
+# Set vault_sync_grant_invoker_binding = true only if the Terraform service account
+# has run.services.getIamPolicy and run.services.setIamPolicy on the vault-sync service.
 
 # Optional: if true and the direct synthetic payload post fails, run POST /sync-all
 # to force a full resync from vault-sync's side.

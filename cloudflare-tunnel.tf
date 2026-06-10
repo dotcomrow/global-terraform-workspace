@@ -26,6 +26,7 @@ module "cloudflare_tunnel" {
   gcp_secret_id     = each.value.gcp_secret_id
   proxied         = each.value.proxied
   emit_tunnel_secret_sync_events      = var.emit_tunnel_secret_sync_events
+  vault_sync_grant_invoker_binding    = var.vault_sync_grant_invoker_binding
   vault_sync_event_url                = var.vault_sync_event_url
   vault_sync_event_token              = var.vault_sync_event_token
   google_credentials_json             = var.google_credentials_tunnel_key_json

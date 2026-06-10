@@ -86,6 +86,12 @@ variable "emit_tunnel_secret_sync_events" {
   default     = false
 }
 
+variable "vault_sync_grant_invoker_binding" {
+  description = "When true, grant the workspace service account Cloud Run invoker permission on the vault-sync service."
+  type        = bool
+  default     = false
+}
+
 variable "google_credentials_json" {
   description = "Optional Google service account JSON for local-exec auth during vault-sync event discovery."
   type        = string

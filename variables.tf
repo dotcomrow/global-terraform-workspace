@@ -23,6 +23,13 @@ variable "emit_tunnel_secret_sync_events" {
   nullable    = false
 }
 
+variable "vault_sync_grant_invoker_binding" {
+  description = "When true, attempt to manage Cloud Run invoker IAM binding for the vault-sync service."
+  type        = bool
+  default     = false
+  nullable    = false
+}
+
 variable "vault_sync_event_url" {
   description = "Webhook URL for synthetic vault-sync events (for example https://vault-sync-run-container-.../)."
   type        = string
