@@ -28,7 +28,7 @@ locals {
   vault_sync_service_project_env = local.vault_sync_service_project != "" ? { VAULT_SYNC_SERVICE_PROJECT_ID = local.vault_sync_service_project } : {}
   vault_sync_event_url_secret_name_env = local.vault_sync_event_url_secret_name != "" ? { VAULT_SYNC_EVENT_URL_SECRET_NAME = local.vault_sync_event_url_secret_name } : {}
   vault_sync_event_token_secret_name_env = local.vault_sync_event_token_secret_name != "" ? { VAULT_SYNC_EVENT_TOKEN_SECRET_NAME = local.vault_sync_event_token_secret_name } : {}
-  emit_tunnel_secret_events = var.emit_tunnel_secret_sync_events
+  emit_tunnel_secret_events = var.emit_tunnel_secret_sync_events || local.vault_sync_event_url != ""
   workspace_service_account_email = trimspace(try(jsondecode(var.google_credentials_json).client_email, ""))
 }
 
