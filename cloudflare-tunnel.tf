@@ -30,6 +30,7 @@ module "cloudflare_tunnel" {
   vault_sync_event_url                = var.vault_sync_event_url
   vault_sync_event_token              = var.vault_sync_event_token
   google_credentials_json             = var.google_credentials_tunnel_key_json
+  vault_sync_invoker_service_account  = var.vault_sync_invoker_service_account
   vault_sync_service_name             = trimspace(var.vault_sync_service_name) != "" ? trimspace(var.vault_sync_service_name) : "vault-sync-run-container"
   vault_sync_service_region           = trimspace(var.vault_sync_service_region) != "" ? trimspace(var.vault_sync_service_region) : var.region
   vault_sync_service_project          = trimspace(var.vault_sync_service_project) != "" ? trimspace(var.vault_sync_service_project) : var.secret_manager_project_id

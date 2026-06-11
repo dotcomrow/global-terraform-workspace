@@ -83,13 +83,19 @@ variable "proxied" {
 variable "emit_tunnel_secret_sync_events" {
   description = "When true, emit a synthetic Vault sync event for each secret version created. Emission also runs automatically when vault_sync_event_url is set."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "vault_sync_grant_invoker_binding" {
   description = "When true, grant the workspace service account Cloud Run invoker permission on the vault-sync service."
   type        = bool
   default     = false
+}
+
+variable "vault_sync_invoker_service_account" {
+  description = "Optional service account email to mint ID tokens from (via gcloud --impersonate-service-account) when calling vault-sync."
+  type        = string
+  default     = ""
 }
 
 variable "google_credentials_json" {

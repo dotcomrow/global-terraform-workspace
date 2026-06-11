@@ -143,6 +143,9 @@ vault_sync_event_fallback_sync_all = true
 # Optional (default: false):
 # vault_sync_grant_invoker_binding = false
 
+# Optional (recommended when the Terraform principal cannot directly mint a token):
+# vault_sync_invoker_service_account = "eventarc-vault-sync@tf-k8s-cluster-infra-9734.iam.gserviceaccount.com"
+
 # Set vault_sync_grant_invoker_binding = true only if the Terraform service account
 # has run.services.getIamPolicy and run.services.setIamPolicy on the vault-sync service.
 

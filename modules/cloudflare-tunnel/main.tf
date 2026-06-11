@@ -18,6 +18,7 @@ locals {
   vault_sync_service_project = trimspace(var.vault_sync_service_project) != "" ? trimspace(var.vault_sync_service_project) : var.project_id
   vault_sync_event_url_secret_name = trimspace(var.vault_sync_event_url_secret_name)
   vault_sync_event_token_secret_name = trimspace(var.vault_sync_event_token_secret_name)
+  vault_sync_invoker_service_account = trimspace(var.vault_sync_invoker_service_account)
   vault_sync_event_url    = trimspace(var.vault_sync_event_url)
   vault_sync_event_fallback_sync_all = var.vault_sync_event_fallback_sync_all
   vault_sync_event_url_env  = local.vault_sync_event_url != "" ? { VAULT_SYNC_EVENT_URL = local.vault_sync_event_url } : {}
@@ -104,7 +105,10 @@ resource "google_secret_manager_secret_version" "tunnel_token" {
 resource "null_resource" "emit_tunnel_secret_sync_event" {
   count = (var.create_gcp_secret && local.emit_tunnel_secret_events) ? 1 : 0
 
-  depends_on = [google_secret_manager_secret_version.tunnel_token]
+  depends_on = [
+    google_secret_manager_secret_version.tunnel_token,
+    google_cloud_run_service_iam_member.vault_sync_invoker,
+  ]
 
   triggers = {
     version_id = google_secret_manager_secret_version.tunnel_token[0].id
@@ -124,6 +128,7 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
       local.vault_sync_service_name_env,
       local.vault_sync_service_region_env,
       local.vault_sync_service_project_env,
+      local.vault_sync_invoker_service_account != "" ? { VAULT_SYNC_INVOKER_SERVICE_ACCOUNT = local.vault_sync_invoker_service_account } : {},
       local.vault_sync_event_url_secret_name_env,
       local.vault_sync_event_token_secret_name_env,
     )
@@ -139,6 +144,7 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
       : "$${VAULT_SYNC_EVENT_URL_SECRET_NAME:=vault-sync-event-url}"
       : "$${VAULT_SYNC_EVENT_TOKEN_SECRET_NAME:=vault-sync-event-token}"
       : "$${VAULT_SYNC_EVENT_FALLBACK_SYNC_ALL:=false}"
+      : "$${VAULT_SYNC_INVOKER_SERVICE_ACCOUNT:=}"
 
       trim() {
         printf '%s' "$${1}" | tr -d '\r\n' | sed 's/^\\s*//;s/\\s*$//'
@@ -207,6 +213,12 @@ resource "null_resource" "emit_tunnel_secret_sync_event" {
 
         if [ -n "$${audience}" ] && command -v gcloud >/dev/null 2>&1; then
           discovered="$$(gcloud auth print-identity-token --audiences "$${audience}" 2>/dev/null || true)"
+        fi
+
+        if [ -z "$${discovered}" ] && [ -n "$${audience}" ] && [ -n "$${VAULT_SYNC_INVOKER_SERVICE_ACCOUNT}" ] && command -v gcloud >/dev/null 2>&1; then
+          discovered="$$(gcloud auth print-identity-token \
+            --audiences "$${audience}" \
+            --impersonate-service-account "$${VAULT_SYNC_INVOKER_SERVICE_ACCOUNT}" 2>/dev/null || true)"
         fi
 
         if [ -z "$${discovered}" ] && [ -n "$${audience}" ] && command -v curl >/dev/null 2>&1; then

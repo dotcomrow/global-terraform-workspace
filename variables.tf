@@ -30,6 +30,12 @@ variable "vault_sync_grant_invoker_binding" {
   nullable    = false
 }
 
+variable "vault_sync_invoker_service_account" {
+  description = "Optional service account email to impersonate when minting vault-sync ID tokens."
+  type        = string
+  default     = ""
+}
+
 variable "vault_sync_event_url" {
   description = "Webhook URL for synthetic vault-sync events (for example https://vault-sync-run-container-.../)."
   type        = string
