@@ -11,7 +11,7 @@ vault_sync_service_name          = "vault-sync-run-container"
 cloudflare_tunnels = {
   graphql = {
     name              = "graphql-origin-tunnel"
-    dns_record_name   = "graphql-origin-tunnel"
+    dns_record_name   = "graphql-origin"
     service           = "http://hasura.graphql.svc.cluster.local:8080"
     create_gcp_secret = true
     gcp_secret_id     = "cloudflare-tunnel-graphql-token"
@@ -20,7 +20,7 @@ cloudflare_tunnels = {
 
   keycloak = {
     name              = "keycloak-origin-tunnel"
-    dns_record_name   = "auth-origin-tunnel"
+    dns_record_name   = "auth-origin"
     service           = "http://keycloak.keycloak.svc.cluster.local:8080"
     create_gcp_secret = true
     gcp_secret_id     = "cloudflare-tunnel-keycloak-token"
@@ -29,7 +29,7 @@ cloudflare_tunnels = {
 
   openobserve = {
     name              = "openobserve-origin-tunnel"
-    dns_record_name   = "openobserve-origin-tunnel"
+    dns_record_name   = "openobserve-origin"
     service           = "http://openobserve-router.openobserve.svc.cluster.local:5080"
     create_gcp_secret = true
     gcp_secret_id     = "cloudflare-tunnel-openobserve-token"
